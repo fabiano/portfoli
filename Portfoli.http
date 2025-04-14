@@ -1,0 +1,22 @@
+# @name getAllPortfolios
+GET http://localhost:5197/portfolios
+
+###
+
+# @name createPortfolio
+POST http://localhost:5197/portfolios
+Content-Type: application/json
+
+{
+  "name": "My Portfolio"
+}
+
+###
+
+# @name getPortfolioById
+GET http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}
+
+###
+
+# @name deletePortfolio
+DELETE http://localhost:5197/portfolios/{{getPortfolioById.response.body.$.id}}

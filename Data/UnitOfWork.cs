@@ -1,0 +1,41 @@
+namespace Portfoli.Data;
+
+/// <summary>
+/// Unit of Work pattern to manage repositories and save changes to the database.
+/// </summary>
+public interface IUnitOfWork
+{
+    /// <summary>
+    /// Gets the portfolio repository.
+    /// </summary>
+    IPortfolioRepository Portfolios { get; }
+
+    /// <summary>
+    /// Gets the asset repository.
+    /// </summary>
+    IAssetRepository Assets { get; }
+
+    /// <summary>
+    /// Saves changes to the database.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task SaveChanges(CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// Implementation of the <see cref="IUnitOfWork"/> interface using the Entity Framework database context.
+/// </summary>
+/// <param name="serviceProvider">The service provider.</param>
+/// <param name="dbContext">The database context.</param>
+public class UnitOfWork(IServiceProvider serviceProvider, PortfoliDbContext dbContext) : IUnitOfWork
+{
+    /// <inheritdoc/>
+    public IPortfolioRepository Portfolios => serviceProvider.GetRequiredService<IPortfolioRepository>();
+
+    /// <inheritdoc/>
+    public IAssetRepository Assets => serviceProvider.GetRequiredService<IAssetRepository>();
+
+    /// <inheritdoc/>
+    public async Task SaveChanges(CancellationToken cancellationToken = default) => await dbContext.SaveChangesAsync(cancellationToken);
+}
