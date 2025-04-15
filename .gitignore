@@ -22,3 +22,6 @@ bld/
 
 # Environment variable file
 .env
+
+# Sqlite database file
+*.db*
