@@ -19,14 +19,22 @@ public static class DeleteTransaction
     public static IServiceCollection AddDeleteTransactionServices(this IServiceCollection services)
     {
         services.AddScoped<DeleteTransactionHandler>();
+        services.AddScoped<DeleteTransactionRequestValidator>();
 
         return services;
     }
 
-    public class DeleteTransactionHandler(IUnitOfWork unitOfWork)
+    public class DeleteTransactionHandler(IUnitOfWork unitOfWork, DeleteTransactionRequestValidator validator)
     {
         public async Task<Result> Handle(DeleteTransactionRequest request)
         {
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                return Error.New(validationResult);
+            }
+
             var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
             if (portfolio is null)
@@ -57,4 +65,19 @@ public static class DeleteTransaction
     }
 
     public record DeleteTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, TransactionId TransactionId);
+
+    public class DeleteTransactionRequestValidator : AbstractValidator<DeleteTransactionRequest>
+    {
+        public DeleteTransactionRequestValidator()
+        {
+            RuleFor(p => p.PortfolioId)
+                .NotEmpty();
+
+            RuleFor(p => p.HoldingId)
+                .NotEmpty();
+
+            RuleFor(p => p.TransactionId)
+                .NotEmpty();
+        }
+    }
 }

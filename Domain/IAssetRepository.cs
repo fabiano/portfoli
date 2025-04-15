@@ -34,7 +34,7 @@ public interface IAssetRepository
     Task Add(Asset Asset);
 
     /// <summary>
-    /// Updates an existing asset in the repository.
+    /// Deletes an existing asset in the repository.
     /// </summary>
     /// <param name="Asset">The asset to update.</param>
     /// <returns>A task representing the asynchronous operation.</returns>

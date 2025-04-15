@@ -26,7 +26,7 @@ public interface IPortfolioRepository
     Task Add(Portfolio portfolio);
 
     /// <summary>
-    /// Updates an existing portfolio in the repository.
+    /// Deletes an existing portfolio in the repository.
     /// </summary>
     /// <param name="portfolio">The portfolio to update.</param>
     /// <returns>A task representing the asynchronous operation.</returns>

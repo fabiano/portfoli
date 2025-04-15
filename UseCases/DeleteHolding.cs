@@ -19,14 +19,22 @@ public static class DeleteHolding
     public static IServiceCollection AddDeleteHoldingServices(this IServiceCollection services)
     {
         services.AddScoped<DeleteHoldingHandler>();
+        services.AddScoped<DeleteHoldingRequestValidator>();
 
         return services;
     }
 
-    public class DeleteHoldingHandler(IUnitOfWork unitOfWork)
+    public class DeleteHoldingHandler(IUnitOfWork unitOfWork, DeleteHoldingRequestValidator validator)
     {
         public async Task<Result> Handle(DeleteHoldingRequest request)
         {
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                return Error.New(validationResult);
+            }
+
             var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
             if (portfolio is null)
@@ -50,4 +58,16 @@ public static class DeleteHolding
     }
 
     public record DeleteHoldingRequest(PortfolioId PortfolioId, HoldingId HoldingId);
+
+    public class DeleteHoldingRequestValidator : AbstractValidator<DeleteHoldingRequest>
+    {
+        public DeleteHoldingRequestValidator()
+        {
+            RuleFor(p => p.PortfolioId)
+                .NotEmpty();
+
+            RuleFor(p => p.HoldingId)
+                .NotEmpty();
+        }
+    }
 }

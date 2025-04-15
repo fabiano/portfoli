@@ -19,14 +19,22 @@ public static class DeletePortfolio
     public static IServiceCollection AddDeletePortfolioServices(this IServiceCollection services)
     {
         services.AddScoped<DeletePortfolioHandler>();
+        services.AddScoped<DeletePortfolioRequestValidator>();
 
         return services;
     }
 
-    public class DeletePortfolioHandler(IUnitOfWork unitOfWork)
+    public class DeletePortfolioHandler(IUnitOfWork unitOfWork, DeletePortfolioRequestValidator validator)
     {
         public async Task<Result> Handle(DeletePortfolioRequest request)
         {
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                return Error.New(validationResult);
+            }
+
             var portfolio = await unitOfWork.Portfolios.Get(request.Id);
 
             if (portfolio is null)
@@ -42,4 +50,13 @@ public static class DeletePortfolio
     }
 
     public record DeletePortfolioRequest(PortfolioId Id);
+
+    public class DeletePortfolioRequestValidator : AbstractValidator<DeletePortfolioRequest>
+    {
+        public DeletePortfolioRequestValidator()
+        {
+            RuleFor(p => p.Id)
+                .NotEmpty();
+        }
+    }
 }

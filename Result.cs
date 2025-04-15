@@ -159,24 +159,43 @@ public record Result<T>
 /// Represents an error that can occur during an operation.
 /// </summary>
 /// <param name="ErrorMessage">The message describing the error.</param>
-public record Error(string ErrorMessage)
+/// <param name="ValidationErrors">The validation errors associated with the error.</param>
+public record Error(string ErrorMessage, IDictionary<string, string[]> ValidationErrors)
 {
     /// <summary>
     /// Creates a new error.
     /// </summary>
     /// <param name="errorMessage">The error message.</param>
-    public static Error New(string errorMessage) => new(errorMessage);
+    /// <returns>An <see cref="Error"/> instance.</returns>
+    public static Error New(string errorMessage) => new(errorMessage, new Dictionary<string, string[]>());
+
+    /// <summary>
+    /// Creates a new error with additional details.
+    /// </summary>
+    /// <param name="errorMessage">The error message.</param>
+    /// <param name="validationErrors">The validation errors associated with the error.</param>
+    /// <returns>An <see cref="Error"/> instance.</returns>
+    public static Error New(string errorMessage, IDictionary<string, string[]> validationErrors) => new(errorMessage, validationErrors);
+
+    /// <summary>
+    /// Creates a new error from a <see cref="ValidationResult"/>.
+    /// </summary>
+    /// <param name="validationResult">The validation result.</param>
+    /// <returns>An <see cref="Error"/> instance.</returns>
+    public static Error New(ValidationResult validationResult) => new("There were some errors in your submission. Please review and try again.", validationResult.ToDictionary());
 
     /// <summary>
     /// Creates an unauthorized error.
     /// </summary>
     /// <param name="errorMessage">The error message.</param>
+    /// <returns>An <see cref="Error"/> instance.</returns>
     public static Error Unauthorized(string errorMessage) => new Unauthorized(errorMessage);
 
     /// <summary>
     /// Creates a not found error.
     /// </summary>
     /// <param name="errorMessage">The error message.</param>
+    /// <returns>An <see cref="Error"/> instance.</returns>
     public static Error NotFound(string errorMessage) => new NotFound(errorMessage);
 }
 
@@ -184,13 +203,13 @@ public record Error(string ErrorMessage)
 /// Represents an unauthorized error.
 /// </summary>
 /// <param name="ErrorMessage">The error message.</param>
-public record Unauthorized(string ErrorMessage) : Error(ErrorMessage);
+public record Unauthorized(string ErrorMessage) : Error(ErrorMessage, new Dictionary<string, string[]>());
 
 /// <summary>
 /// Represents a not found error.
 /// </summary>
 /// <param name="ErrorMessage">The error message.</param>
-public record NotFound(string ErrorMessage) : Error(ErrorMessage);
+public record NotFound(string ErrorMessage) : Error(ErrorMessage, new Dictionary<string, string[]>());
 
 /// <summary>
 /// Extension methods for converting errors to HTTP results.
@@ -207,6 +226,7 @@ public static class ResultExtensions
     {
         Unauthorized => Results.Unauthorized(),
         NotFound => Results.NotFound(error.ErrorMessage),
+        Error { ValidationErrors.Count: > 0 } => Results.ValidationProblem(error.ValidationErrors, error.ErrorMessage),
         Error => Results.Problem(error.ErrorMessage),
     };
 }

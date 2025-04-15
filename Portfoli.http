@@ -19,4 +19,39 @@ GET http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}
 ###
 
 # @name deletePortfolio
-DELETE http://localhost:5197/portfolios/{{getPortfolioById.response.body.$.id}}
+DELETE http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}
+
+###
+
+# @name createHolding
+POST http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}/holdings
+Content-Type: application/json
+
+{
+  "exchange": "NYSE",
+  "ticker": "SPY"
+}
+
+###
+
+# @name deleteHolding
+DELETE http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}/holdings/{{createHolding.response.body.$.id}}
+
+
+###
+
+# @name createTransaction
+POST http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}/holdings/{{createHolding.response.body.$.id}}/transactions
+Content-Type: application/json
+
+{
+  "type": "Buy",
+  "quantity": 100,
+  "date": "2025-01-01T00:00:00Z",
+  "price": 537.61
+}
+
+###
+
+# @name deleteTransaction
+DELETE http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}/holdings/{{createHolding.response.body.$.id}}/transactions/{{createTransaction.response.body.$.id}}

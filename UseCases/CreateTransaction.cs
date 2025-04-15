@@ -4,12 +4,12 @@ public static class CreateTransaction
 {
     public static RouteGroupBuilder MapCreateTransactionEndpoint(this RouteGroupBuilder group)
     {
-        group.MapPost("/", async (CreateTransactionRequest request, CreateTransactionHandler handler) =>
+        group.MapPost("/", async (Guid portfolioId, Guid holdingId,  CreateTransactionRequest request, CreateTransactionHandler handler) =>
         {
-            var result = await handler.Handle(request);
+            var result = await handler.Handle(request with { PortfolioId = portfolioId, HoldingId = holdingId });
 
             return result.Match(
-                onSuccess: response => Results.Created($"/portfolios/{request.PortfolioId}/holdings/{request.HoldingId}/transactions/{response.Id}", response),
+                onSuccess: response => Results.Created($"/portfolios/{portfolioId}/holdings/{holdingId}/transactions/{response.Id}", response),
                 onError: error => Results.Extensions.FromError(error));
         });
 
@@ -19,14 +19,22 @@ public static class CreateTransaction
     public static IServiceCollection AddCreateTransactionServices(this IServiceCollection services)
     {
         services.AddScoped<CreateTransactionHandler>();
+        services.AddScoped<CreateTransactionRequestValidator>();
 
         return services;
     }
 
-    public class CreateTransactionHandler(IUnitOfWork unitOfWork)
+    public class CreateTransactionHandler(IUnitOfWork unitOfWork, CreateTransactionRequestValidator validator)
     {
         public async Task<Result<CreateTransactionResponse>> Handle(CreateTransactionRequest request)
         {
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                return Error.New(validationResult);
+            }
+
             var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
             if (portfolio is null)
@@ -43,7 +51,7 @@ public static class CreateTransaction
 
             var transaction = new Transaction
             {
-                Type = request.Type,
+                Type = Enum.Parse<TransactionType>(request.Type),
                 Quantity = request.Quantity,
                 Price = request.Price,
                 Date = request.Date,
@@ -57,7 +65,32 @@ public static class CreateTransaction
         }
     }
 
-    public record CreateTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, TransactionType Type, decimal Quantity, decimal Price, DateTime Date);
+    public record CreateTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, string Type, decimal Quantity, decimal Price, DateTime Date);
 
     public record CreateTransactionResponse(TransactionId Id);
+
+    public class CreateTransactionRequestValidator : AbstractValidator<CreateTransactionRequest>
+    {
+        public CreateTransactionRequestValidator()
+        {
+            RuleFor(p => p.PortfolioId)
+                .NotEmpty();
+
+            RuleFor(p => p.HoldingId)
+                .NotEmpty();
+
+            RuleFor(p => p.Type)
+                .NotEmpty()
+                .IsEnumName(typeof(TransactionType));
+
+            RuleFor(p => p.Quantity)
+                .GreaterThan(0);
+
+            RuleFor(p => p.Price)
+                .GreaterThan(0);
+
+            RuleFor(p => p.Date)
+                .NotEmpty();
+        }
+    }
 }
