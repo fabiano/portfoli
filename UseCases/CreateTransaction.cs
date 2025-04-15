@@ -1,6 +1,6 @@
 namespace Portfoli.UseCases;
 
-public static class CreateTransactionExtensions
+public static class CreateTransaction
 {
     public static RouteGroupBuilder MapCreateTransactionEndpoint(this RouteGroupBuilder group)
     {
@@ -8,7 +8,9 @@ public static class CreateTransactionExtensions
         {
             var result = await handler.Handle(request);
 
-            return Results.Created($"/portfolios/{request.PortfolioId}/holdings/{request.HoldingId}/transactions/{result.Id}", result);
+            return result.Match(
+                onSuccess: response => Results.Created($"/portfolios/{request.PortfolioId}/holdings/{request.HoldingId}/transactions/{response.Id}", response),
+                onError: error => Results.Extensions.FromError(error));
         });
 
         return group;
@@ -20,31 +22,42 @@ public static class CreateTransactionExtensions
 
         return services;
     }
-}
 
-public class CreateTransactionHandler(IUnitOfWork unitOfWork)
-{
-    public async Task<CreateTransactionResponse> Handle(CreateTransactionRequest request)
+    public class CreateTransactionHandler(IUnitOfWork unitOfWork)
     {
-        var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId) ?? throw new PortfolioNotFoundException(request.PortfolioId);
-        var holding = portfolio.GetHolding(request.HoldingId) ?? throw new HoldingNotFoundException(request.PortfolioId, request.HoldingId);
-
-        var transaction = new Transaction
+        public async Task<Result<CreateTransactionResponse>> Handle(CreateTransactionRequest request)
         {
-            Type = request.Type,
-            Quantity = request.Quantity,
-            Price = request.Price,
-            Date = request.Date,
-        };
+            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
-        portfolio.AddTransaction(holding, transaction);
+            if (portfolio is null)
+            {
+                return Error.NotFound($"Portfolio {request.PortfolioId} not found.");
+            }
 
-        await unitOfWork.SaveChanges();
+            var holding = portfolio.GetHolding(request.HoldingId);
 
-        return new CreateTransactionResponse(transaction.Id);
+            if (holding is null)
+            {
+                return Error.NotFound($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+            }
+
+            var transaction = new Transaction
+            {
+                Type = request.Type,
+                Quantity = request.Quantity,
+                Price = request.Price,
+                Date = request.Date,
+            };
+
+            portfolio.AddTransaction(holding, transaction);
+
+            await unitOfWork.SaveChanges();
+
+            return new CreateTransactionResponse(transaction.Id);
+        }
     }
+
+    public record CreateTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, TransactionType Type, decimal Quantity, decimal Price, DateTime Date);
+
+    public record CreateTransactionResponse(TransactionId Id);
 }
-
-public record CreateTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, TransactionType Type, decimal Quantity, decimal Price, DateTime Date);
-
-public record CreateTransactionResponse(TransactionId Id);

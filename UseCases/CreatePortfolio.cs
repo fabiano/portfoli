@@ -1,6 +1,6 @@
 namespace Portfoli.UseCases;
 
-public static class CreatePortfolioExtensions
+public static class CreatePortfolio
 {
     public static RouteGroupBuilder MapCreatePortfolioEndpoint(this RouteGroupBuilder group)
     {
@@ -8,7 +8,9 @@ public static class CreatePortfolioExtensions
         {
             var result = await handler.Handle(request);
 
-            return Results.Created($"/portfolios/{result.Id}", result);
+            return result.Match(
+                onSuccess: response => Results.Created($"/portfolios/{response.Id}", response),
+                onError: error => Results.Extensions.FromError(error));
         });
 
         return group;
@@ -20,21 +22,21 @@ public static class CreatePortfolioExtensions
 
         return services;
     }
-}
 
-public class CreatePortfolioHandler(IUnitOfWork unitOfWork)
-{
-    public async Task<CreatePortfolioResponse> Handle(CreatePortfolioRequest request)
+    public class CreatePortfolioHandler(IUnitOfWork unitOfWork)
     {
-        var portfolio = new Portfolio { Name = request.Name };
+        public async Task<Result<CreatePortfolioResponse>> Handle(CreatePortfolioRequest request)
+        {
+            var portfolio = new Portfolio { Name = request.Name };
 
-        await unitOfWork.Portfolios.Add(portfolio);
-        await unitOfWork.SaveChanges();
+            await unitOfWork.Portfolios.Add(portfolio);
+            await unitOfWork.SaveChanges();
 
-        return new CreatePortfolioResponse(portfolio.Id);
+            return new CreatePortfolioResponse(portfolio.Id);
+        }
     }
+
+    public record CreatePortfolioRequest(string Name);
+
+    public record CreatePortfolioResponse(PortfolioId Id);
 }
-
-public record CreatePortfolioRequest(string Name);
-
-public record CreatePortfolioResponse(PortfolioId Id);

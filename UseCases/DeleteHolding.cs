@@ -1,14 +1,16 @@
 namespace Portfoli.UseCases;
 
-public static class DeleteHoldingExtensions
+public static class DeleteHolding
 {
     public static RouteGroupBuilder MapDeleteHoldingEndpoint(this RouteGroupBuilder group)
     {
         group.MapDelete("/{holdingId:guid}", async (Guid portfolioId, Guid holdingId, DeleteHoldingHandler handler) =>
         {
-            await handler.Handle(new DeleteHoldingRequest(portfolioId, holdingId));
+            var result = await handler.Handle(new DeleteHoldingRequest(portfolioId, holdingId));
 
-            return Results.NoContent();
+            return result.Match(
+                onSuccess: () => Results.NoContent(),
+                onError: error => Results.Extensions.FromError(error));
         });
 
         return group;
@@ -20,19 +22,32 @@ public static class DeleteHoldingExtensions
 
         return services;
     }
-}
 
-public class DeleteHoldingHandler(IUnitOfWork unitOfWork)
-{
-    public async Task Handle(DeleteHoldingRequest request)
+    public class DeleteHoldingHandler(IUnitOfWork unitOfWork)
     {
-        var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId) ?? throw new PortfolioNotFoundException(request.PortfolioId);
-        var holding = portfolio.GetHolding(request.HoldingId) ?? throw new HoldingNotFoundException(request.PortfolioId, request.HoldingId);
+        public async Task<Result> Handle(DeleteHoldingRequest request)
+        {
+            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
-        portfolio.RemoveHolding(holding);
+            if (portfolio is null)
+            {
+                return Error.NotFound($"Portfolio {request.PortfolioId} not found.");
+            }
 
-        await unitOfWork.SaveChanges();
+            var holding = portfolio.GetHolding(request.HoldingId);
+
+            if (holding is null)
+            {
+                return Error.NotFound($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+            }
+
+            portfolio.RemoveHolding(holding);
+
+            await unitOfWork.SaveChanges();
+
+            return Result.Success;
+        }
     }
-}
 
-public record DeleteHoldingRequest(PortfolioId PortfolioId, HoldingId HoldingId);
+    public record DeleteHoldingRequest(PortfolioId PortfolioId, HoldingId HoldingId);
+}

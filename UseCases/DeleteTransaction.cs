@@ -1,14 +1,16 @@
 namespace Portfoli.UseCases;
 
-public static class DeleteTransactionExtensions
+public static class DeleteTransaction
 {
     public static RouteGroupBuilder MapDeleteTransactionEndpoint(this RouteGroupBuilder group)
     {
         group.MapDelete("/{transactionId:guid}", async (Guid transactionId, Guid portfolioId, Guid holdingId, DeleteTransactionHandler handler) =>
         {
-            await handler.Handle(new DeleteTransactionRequest(portfolioId, holdingId, transactionId));
+            var result = await handler.Handle(new DeleteTransactionRequest(portfolioId, holdingId, transactionId));
 
-            return Results.NoContent();
+            return result.Match(
+                onSuccess: () => Results.NoContent(),
+                onError: error => Results.Extensions.FromError(error));
         });
 
         return group;
@@ -20,20 +22,39 @@ public static class DeleteTransactionExtensions
 
         return services;
     }
-}
 
-public class DeleteTransactionHandler(IUnitOfWork unitOfWork)
-{
-    public async Task Handle(DeleteTransactionRequest request)
+    public class DeleteTransactionHandler(IUnitOfWork unitOfWork)
     {
-        var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId) ?? throw new PortfolioNotFoundException(request.PortfolioId);
-        var holding = portfolio.GetHolding(request.HoldingId) ?? throw new HoldingNotFoundException(request.PortfolioId, request.HoldingId);
-        var transaction = holding.GetTransaction(request.TransactionId) ?? throw new TransactionNotFoundException(request.PortfolioId, request.HoldingId, request.TransactionId);
+        public async Task<Result> Handle(DeleteTransactionRequest request)
+        {
+            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
-        portfolio.RemoveTransaction(holding, transaction);
+            if (portfolio is null)
+            {
+                return Error.NotFound($"Portfolio {request.PortfolioId} not found.");
+            }
 
-        await unitOfWork.SaveChanges();
+            var holding = portfolio.GetHolding(request.HoldingId);
+
+            if (holding is null)
+            {
+                return Error.NotFound($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+            }
+
+            var transaction = holding.GetTransaction(request.TransactionId);
+
+            if (transaction is null)
+            {
+                return Error.NotFound($"Transaction {request.TransactionId} not found in holding {request.HoldingId} of portfolio {request.PortfolioId}.");
+            }
+
+            portfolio.RemoveTransaction(holding, transaction);
+
+            await unitOfWork.SaveChanges();
+
+            return Result.Success;
+        }
     }
-}
 
-public record DeleteTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, TransactionId TransactionId);
+    public record DeleteTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, TransactionId TransactionId);
+}

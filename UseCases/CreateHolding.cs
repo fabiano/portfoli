@@ -1,6 +1,6 @@
 namespace Portfoli.UseCases;
 
-public static class CreateHoldingExtensions
+public static class CreateHolding
 {
     public static RouteGroupBuilder MapCreateHoldingEndpoint(this RouteGroupBuilder group)
     {
@@ -8,7 +8,9 @@ public static class CreateHoldingExtensions
         {
             var result = await handler.Handle(request);
 
-            return Results.Created($"/portfolios/{request.PortfolioId}/holdings/{result.Id}", result);
+            return result.Match(
+                onSuccess: response => Results.Created($"/portfolios/{request.PortfolioId}/holdings/{response.Id}", response),
+                onError: error => Results.Extensions.FromError(error));
         });
 
         return group;
@@ -20,28 +22,39 @@ public static class CreateHoldingExtensions
 
         return services;
     }
-}
 
-public class CreateHoldingHandler(IUnitOfWork unitOfWork)
-{
-    public async Task<CreateHoldingResponse> Handle(CreateHoldingRequest request)
+    public class CreateHoldingHandler(IUnitOfWork unitOfWork)
     {
-        var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId) ?? throw new PortfolioNotFoundException(request.PortfolioId);
-        var asset = await unitOfWork.Assets.GetByTicker(request.Exchange, request.Ticker) ?? throw new AssetNotFoundException(request.Exchange, request.Ticker);
-
-        var holding = new Holding
+        public async Task<Result<CreateHoldingResponse>> Handle(CreateHoldingRequest request)
         {
-            Asset = asset,
-        };
+            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
-        portfolio.AddHolding(holding);
+            if (portfolio is null)
+            {
+                return Error.NotFound($"Portfolio {request.PortfolioId} not found.");
+            }
 
-        await unitOfWork.SaveChanges();
+            var asset = await unitOfWork.Assets.GetByTicker(request.Exchange, request.Ticker);
 
-        return new CreateHoldingResponse(holding.Id);
+            if (asset is null)
+            {
+                return Error.NotFound($"Asset {request.Ticker} on {request.Exchange} not found.");
+            }
+
+            var holding = new Holding
+            {
+                Asset = asset,
+            };
+
+            portfolio.AddHolding(holding);
+
+            await unitOfWork.SaveChanges();
+
+            return new CreateHoldingResponse(holding.Id);
+        }
     }
+
+    public record CreateHoldingRequest(PortfolioId PortfolioId, string Exchange, string Ticker);
+
+    public record CreateHoldingResponse(HoldingId Id);
 }
-
-public record CreateHoldingRequest(PortfolioId PortfolioId, string Exchange, string Ticker);
-
-public record CreateHoldingResponse(HoldingId Id);

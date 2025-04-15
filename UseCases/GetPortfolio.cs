@@ -1,6 +1,6 @@
 namespace Portfoli.UseCases;
 
-public static class GetPortfolioExtensions
+public static class GetPortfolio
 {
     public static RouteGroupBuilder MapGetPortfolioEndpoint(this RouteGroupBuilder group)
     {
@@ -8,7 +8,9 @@ public static class GetPortfolioExtensions
         {
             var result = await handler.Handle(new GetPortfolioRequest(portfolioId));
 
-            return Results.Ok(result);
+            return result.Match(
+                onSuccess: response => Results.Ok(response),
+                onError: error => Results.Extensions.FromError(error));
         });
 
         return group;
@@ -20,18 +22,23 @@ public static class GetPortfolioExtensions
 
         return services;
     }
-}
 
-public class GetPortfolioHandler(IUnitOfWork unitOfWork)
-{
-    public async Task<GetPortfolioResponse> Handle(GetPortfolioRequest request)
+    public class GetPortfolioHandler(IUnitOfWork unitOfWork)
     {
-        var portfolio = await unitOfWork.Portfolios.Get(request.Id) ?? throw new PortfolioNotFoundException(request.Id);
+        public async Task<Result<GetPortfolioResponse>> Handle(GetPortfolioRequest request)
+        {
+            var portfolio = await unitOfWork.Portfolios.Get(request.Id);
 
-        return new GetPortfolioResponse(portfolio.Id, portfolio.Name);
+            if (portfolio is null)
+            {
+                return Error.NotFound($"Portfolio {request.Id} not found.");
+            }
+
+            return new GetPortfolioResponse(portfolio.Id, portfolio.Name);
+        }
     }
+
+    public record GetPortfolioRequest(PortfolioId Id);
+
+    public record GetPortfolioResponse(PortfolioId Id, string Name);
 }
-
-public record GetPortfolioRequest(PortfolioId Id);
-
-public record GetPortfolioResponse(PortfolioId Id, string Name);

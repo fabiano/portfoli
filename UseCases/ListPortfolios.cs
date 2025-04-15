@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Portfoli.UseCases;
 
-public static class ListPortfoliosExtensions
+public static class ListPortfolios
 {
     public static RouteGroupBuilder MapListPortfoliosEndpoint(this RouteGroupBuilder group)
     {
@@ -10,7 +10,9 @@ public static class ListPortfoliosExtensions
         {
             var result = await handler.Handle(new ListPortfoliosRequest());
 
-            return Results.Ok(result);
+            return result.Match(
+                onSuccess: response => Results.Ok(response),
+                onError: error => Results.Extensions.FromError(error));
         });
 
         return group;
@@ -22,16 +24,16 @@ public static class ListPortfoliosExtensions
 
         return services;
     }
+
+    public class ListPortfoliosHandler(IUnitOfWork unitOfWork)
+    {
+        public async Task<Result<IEnumerable<ListPortfoliosResponse>>> Handle(ListPortfoliosRequest request) => await unitOfWork.Portfolios
+            .GetAll()
+            .Select(p => new ListPortfoliosResponse(p.Id, p.Name))
+            .ToListAsync();
+    }
+
+    public record ListPortfoliosRequest;
+
+    public record ListPortfoliosResponse(PortfolioId Id, string Name);
 }
-
-public class ListPortfoliosHandler(IUnitOfWork unitOfWork)
-{
-    public async Task<IEnumerable<ListPortfoliosResponse>> Handle(ListPortfoliosRequest request) => await unitOfWork.Portfolios
-        .GetAll()
-        .Select(p => new ListPortfoliosResponse(p.Id, p.Name))
-        .ToListAsync();
-}
-
-public record ListPortfoliosRequest;
-
-public record ListPortfoliosResponse(PortfolioId Id, string Name);

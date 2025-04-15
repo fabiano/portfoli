@@ -1,14 +1,16 @@
 namespace Portfoli.UseCases;
 
-public static class DeletePortfolioExtensions
+public static class DeletePortfolio
 {
     public static RouteGroupBuilder MapDeletePortfolioEndpoint(this RouteGroupBuilder group)
     {
         group.MapDelete("/{portfolioId:guid}", async (Guid portfolioId, DeletePortfolioHandler handler) =>
         {
-            await handler.Handle(new DeletePortfolioRequest(portfolioId));
+            var result = await handler.Handle(new DeletePortfolioRequest(portfolioId));
 
-            return Results.NoContent();
+            return result.Match(
+                onSuccess: () => Results.NoContent(),
+                onError: error => Results.Extensions.FromError(error));
         });
 
         return group;
@@ -20,17 +22,24 @@ public static class DeletePortfolioExtensions
 
         return services;
     }
-}
 
-public class DeletePortfolioHandler(IUnitOfWork unitOfWork)
-{
-    public async Task Handle(DeletePortfolioRequest request)
+    public class DeletePortfolioHandler(IUnitOfWork unitOfWork)
     {
-        var portfolio = await unitOfWork.Portfolios.Get(request.Id) ?? throw new PortfolioNotFoundException(request.Id);
+        public async Task<Result> Handle(DeletePortfolioRequest request)
+        {
+            var portfolio = await unitOfWork.Portfolios.Get(request.Id);
 
-        await unitOfWork.Portfolios.Delete(portfolio);
-        await unitOfWork.SaveChanges();
+            if (portfolio is null)
+            {
+                return Error.NotFound($"Portfolio {request.Id} not found.");
+            }
+
+            await unitOfWork.Portfolios.Delete(portfolio);
+            await unitOfWork.SaveChanges();
+
+            return Result.Success;
+        }
     }
-}
 
-public record DeletePortfolioRequest(PortfolioId Id);
+    public record DeletePortfolioRequest(PortfolioId Id);
+}

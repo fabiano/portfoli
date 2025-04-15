@@ -31,7 +31,6 @@ app.UseExceptionHandler(options => options.Run(async context =>
 
     var result = exception switch
     {
-        NotFoundException => Results.NotFound(exception.Message),
         InvalidDomainOperationException => Results.Problem(exception.Message),
 
         _ => Results.Problem("An unexpected error occurred."),
