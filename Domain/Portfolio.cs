@@ -147,6 +147,12 @@ public record PortfolioId(Guid Value)
     /// </summary>
     /// <param name="value">The Guid value to convert.</param>
     public static implicit operator PortfolioId(Guid value) => new(value);
+
+    /// <summary>
+    /// Returns a string representation of the PortfolioId.
+    /// </summary>
+    /// <returns>A string representation of the PortfolioId.</returns>
+    override public string ToString() => Value.ToString();
 }
 
 /// <summary>

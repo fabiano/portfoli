@@ -102,6 +102,12 @@ public record HoldingId(Guid Value)
     /// </summary>
     /// <param name="value">The Guid value to convert.</param>
     public static implicit operator HoldingId(Guid value) => new(value);
+
+    /// <summary>
+    /// Returns a string representation of the HoldingId.
+    /// </summary>
+    /// <returns>A string representation of the HoldingId.</returns>
+    override public string ToString() => Value.ToString();
 }
 
 /// <summary>

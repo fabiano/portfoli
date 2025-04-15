@@ -57,6 +57,12 @@ public record TransactionId(Guid Value)
     /// </summary>
     /// <param name="value">The Guid value to convert.</param>
     public static implicit operator TransactionId(Guid value) => new(value);
+
+    /// <summary>
+    /// Returns a string representation of the TransactionId.
+    /// </summary>
+    /// <returns>A string representation of the TransactionId.</returns>
+    override public string ToString() => Value.ToString();
 }
 
 /// <summary>
