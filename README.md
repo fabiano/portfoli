@@ -1,6 +1,6 @@
 # portifoli
 
-[![CI](https://github.com/fabiano/portifoli/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/fabiano/portifoli/actions/workflowscontinuous-integration.yml)
+[![Continuous integration](https://github.com/fabiano/portfoli/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/fabiano/portfoli/actions/workflows/continuous-integration.yml)
 
 ## Prerequisites
 
