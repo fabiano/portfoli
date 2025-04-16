@@ -39,7 +39,7 @@ public static class DeletePortfolio
 
             if (portfolio is null)
             {
-                return Error.NotFound($"Portfolio {request.Id} not found.");
+                return Error.NotExists($"Portfolio {request.Id} not found.");
             }
 
             await unitOfWork.Portfolios.Delete(portfolio);

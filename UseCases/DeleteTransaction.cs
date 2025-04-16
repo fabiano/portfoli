@@ -39,21 +39,21 @@ public static class DeleteTransaction
 
             if (portfolio is null)
             {
-                return Error.NotFound($"Portfolio {request.PortfolioId} not found.");
+                return Error.NotExists($"Portfolio {request.PortfolioId} not found.");
             }
 
             var holding = portfolio.GetHolding(request.HoldingId);
 
             if (holding is null)
             {
-                return Error.NotFound($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+                return Error.NotExists($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
             }
 
             var transaction = holding.GetTransaction(request.TransactionId);
 
             if (transaction is null)
             {
-                return Error.NotFound($"Transaction {request.TransactionId} not found in holding {request.HoldingId} of portfolio {request.PortfolioId}.");
+                return Error.NotExists($"Transaction {request.TransactionId} not found in holding {request.HoldingId} of portfolio {request.PortfolioId}.");
             }
 
             portfolio.RemoveTransaction(holding, transaction);

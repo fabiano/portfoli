@@ -189,27 +189,27 @@ public record Error(string ErrorMessage, IDictionary<string, string[]> Validatio
     /// </summary>
     /// <param name="errorMessage">The error message.</param>
     /// <returns>An <see cref="Error"/> instance.</returns>
-    public static Error Unauthorized(string errorMessage) => new Unauthorized(errorMessage);
+    public static Error Unauthorized(string errorMessage) => new UnauthorizedError(errorMessage);
 
     /// <summary>
-    /// Creates a not found error.
+    /// Creates a not exists error.
     /// </summary>
     /// <param name="errorMessage">The error message.</param>
     /// <returns>An <see cref="Error"/> instance.</returns>
-    public static Error NotFound(string errorMessage) => new NotFound(errorMessage);
+    public static Error NotExists(string errorMessage) => new NotExistsError(errorMessage);
 }
 
 /// <summary>
 /// Represents an unauthorized error.
 /// </summary>
 /// <param name="ErrorMessage">The error message.</param>
-public record Unauthorized(string ErrorMessage) : Error(ErrorMessage, new Dictionary<string, string[]>());
+public record UnauthorizedError(string ErrorMessage) : Error(ErrorMessage, new Dictionary<string, string[]>());
 
 /// <summary>
-/// Represents a not found error.
+/// Represents a not exists error.
 /// </summary>
 /// <param name="ErrorMessage">The error message.</param>
-public record NotFound(string ErrorMessage) : Error(ErrorMessage, new Dictionary<string, string[]>());
+public record NotExistsError(string ErrorMessage) : Error(ErrorMessage, new Dictionary<string, string[]>());
 
 /// <summary>
 /// Extension methods for converting errors to HTTP results.
@@ -224,8 +224,8 @@ public static class ResultExtensions
     /// <returns>An HTTP result representing the error.</returns>
     public static IResult FromError(this IResultExtensions _, Error error) => error switch
     {
-        Unauthorized => Results.Unauthorized(),
-        NotFound => Results.NotFound(error.ErrorMessage),
+        UnauthorizedError => Results.Unauthorized(),
+        NotExistsError => Results.NotFound(error.ErrorMessage),
         Error { ValidationErrors.Count: > 0 } => Results.ValidationProblem(error.ValidationErrors, error.ErrorMessage),
         Error => Results.Problem(error.ErrorMessage),
     };

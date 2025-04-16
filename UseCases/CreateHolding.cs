@@ -39,7 +39,7 @@ public static class CreateHolding
 
             if (portfolio is null)
             {
-                return Error.NotFound($"Portfolio {request.PortfolioId} not found.");
+                return Error.NotExists($"Portfolio {request.PortfolioId} not found.");
             }
 
             var asset = await unitOfWork.Assets.GetByTicker(request.Exchange, request.Ticker);
