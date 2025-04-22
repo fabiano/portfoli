@@ -33,7 +33,7 @@ app.UseExceptionHandler(options => options.Run(async context =>
     {
         InvalidDomainOperationException => Results.Problem(exception.Message),
 
-        _ => Results.Problem("An unexpected error occurred."),
+        _ => Results.Problem("An unexpected error occurred.", statusCode: StatusCodes.Status500InternalServerError),
     };
 
     await result.ExecuteAsync(context);
