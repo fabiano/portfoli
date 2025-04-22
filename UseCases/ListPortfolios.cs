@@ -28,6 +28,8 @@ public static class ListPortfolios
     public class ListPortfoliosHandler(PortfoliDbContext dbContext)
     {
         public async Task<Result<IEnumerable<ListPortfoliosResponse>>> Handle(ListPortfoliosRequest request) => await dbContext.Portfolios
+            .AsNoTracking()
+            .OrderBy(p => p.Name)
             .Select(p => new ListPortfoliosResponse(p.Id, p.Name))
             .ToListAsync();
     }

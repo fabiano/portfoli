@@ -38,6 +38,7 @@ public static class GetPortfolio
             }
 
             var portfolio = await dbContext.Portfolios
+                .AsNoTracking()
                 .Where(p => p.Id == request.Id)
                 .Select(p => new GetPortfolioResponse(p.Id, p.Name))
                 .SingleOrDefaultAsync();
