@@ -15,9 +15,6 @@ public class AssetRepository(PortfoliDbContext dbContext) : IAssetRepository
     public async Task<Asset?> GetByTicker(string exchange, string ticker) => await dbContext.Assets.FirstOrDefaultAsync(a => a.Exchange == exchange && a.Ticker == ticker);
 
     /// <inheritdoc />
-    public IQueryable<Asset> GetAll() => dbContext.Assets.AsQueryable();
-
-    /// <inheritdoc />
     public async Task Add(Asset asset) => await dbContext.Assets.AddAsync(asset);
 
     /// <inheritdoc />

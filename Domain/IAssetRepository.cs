@@ -21,12 +21,6 @@ public interface IAssetRepository
     Task<Asset?> GetByTicker(string exchange, string ticker);
 
     /// <summary>
-    /// Retrieves all assets in the repository.
-    /// </summary>
-    /// <returns>An IQueryable collection of assets.</returns>
-    IQueryable<Asset> GetAll();
-
-    /// <summary>
     /// Adds a new asset to the repository.
     /// </summary>
     /// <param name="Asset">The asset to add.</param>

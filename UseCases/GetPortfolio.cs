@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Portfoli.UseCases;
 
 public static class GetPortfolio
@@ -24,7 +26,7 @@ public static class GetPortfolio
         return services;
     }
 
-    public class GetPortfolioHandler(IUnitOfWork unitOfWork, GetPortfolioRequestValidator validator)
+    public class GetPortfolioHandler(PortfoliDbContext dbContext, GetPortfolioRequestValidator validator)
     {
         public async Task<Result<GetPortfolioResponse>> Handle(GetPortfolioRequest request)
         {
@@ -35,14 +37,17 @@ public static class GetPortfolio
                 return Error.New(validationResult);
             }
 
-            var portfolio = await unitOfWork.Portfolios.Get(request.Id);
+            var portfolio = await dbContext.Portfolios
+                .Where(p => p.Id == request.Id)
+                .Select(p => new GetPortfolioResponse(p.Id, p.Name))
+                .SingleOrDefaultAsync();
 
             if (portfolio is null)
             {
                 return Error.NotExists($"Portfolio {request.Id} not found.");
             }
 
-            return new GetPortfolioResponse(portfolio.Id, portfolio.Name);
+            return portfolio;
         }
     }
 

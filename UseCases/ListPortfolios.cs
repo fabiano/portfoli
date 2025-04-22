@@ -25,10 +25,9 @@ public static class ListPortfolios
         return services;
     }
 
-    public class ListPortfoliosHandler(IUnitOfWork unitOfWork)
+    public class ListPortfoliosHandler(PortfoliDbContext dbContext)
     {
-        public async Task<Result<IEnumerable<ListPortfoliosResponse>>> Handle(ListPortfoliosRequest request) => await unitOfWork.Portfolios
-            .GetAll()
+        public async Task<Result<IEnumerable<ListPortfoliosResponse>>> Handle(ListPortfoliosRequest request) => await dbContext.Portfolios
             .Select(p => new ListPortfoliosResponse(p.Id, p.Name))
             .ToListAsync();
     }

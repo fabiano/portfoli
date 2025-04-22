@@ -13,12 +13,6 @@ public interface IPortfolioRepository
     Task<Portfolio?> Get(PortfolioId id);
 
     /// <summary>
-    /// Retrieves all portfolios in the repository.
-    /// </summary>
-    /// <returns>An IQueryable collection of portfolios.</returns>
-    IQueryable<Portfolio> GetAll();
-
-    /// <summary>
     /// Adds a new portfolio to the repository.
     /// </summary>
     /// <param name="portfolio">The portfolio to add.</param>
