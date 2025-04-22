@@ -1,7 +1,7 @@
 namespace Portfoli.Data;
 
 /// <summary>
-/// Unit of Work pattern to manage repositories and save changes to the database.
+/// Unit of Work pattern interface.
 /// </summary>
 public interface IUnitOfWork
 {
