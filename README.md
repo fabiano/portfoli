@@ -1,4 +1,4 @@
-# portifoli
+# portfoli
 
 [![Continuous integration](https://github.com/fabiano/portfoli/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/fabiano/portfoli/actions/workflows/continuous-integration.yml)
 
