@@ -31,7 +31,7 @@ app.UseExceptionHandler(options => options.Run(async context =>
 
     var result = exception switch
     {
-        InvalidDomainOperationException => Results.Problem(exception.Message),
+        InvalidDomainOperationException => Results.Problem(exception.Message, statusCode: StatusCodes.Status400BadRequest),
 
         _ => Results.Problem("An unexpected error occurred.", statusCode: StatusCodes.Status500InternalServerError),
     };
