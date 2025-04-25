@@ -32,21 +32,21 @@ public static class CreateTransaction
 
             if (!validationResult.IsValid)
             {
-                return Error.New(validationResult);
+                return NewError(validationResult);
             }
 
             var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
             if (portfolio is null)
             {
-                return Error.NotExists($"Portfolio {request.PortfolioId} not found.");
+                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
             }
 
             var holding = portfolio.GetHolding(request.HoldingId);
 
             if (holding is null)
             {
-                return Error.NotExists($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+                return NewItemNotFoundError($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
             }
 
             var transaction = new Transaction

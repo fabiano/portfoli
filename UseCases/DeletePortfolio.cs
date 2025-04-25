@@ -32,14 +32,14 @@ public static class DeletePortfolio
 
             if (!validationResult.IsValid)
             {
-                return Error.New(validationResult);
+                return NewError(validationResult);
             }
 
             var portfolio = await unitOfWork.Portfolios.Get(request.Id);
 
             if (portfolio is null)
             {
-                return Error.NotExists($"Portfolio {request.Id} not found.");
+                return NewItemNotFoundError($"Portfolio {request.Id} not found.");
             }
 
             await unitOfWork.Portfolios.Delete(portfolio);

@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 
 namespace Portfoli;
 
@@ -159,57 +160,49 @@ public record Result<T>
 /// Represents an error that can occur during an operation.
 /// </summary>
 /// <param name="ErrorMessage">The message describing the error.</param>
+/// <param name="StatusCode">The HTTP status code associated with the error.</param>
 /// <param name="ValidationErrors">The validation errors associated with the error.</param>
-public record Error(string ErrorMessage, IDictionary<string, string[]> ValidationErrors)
+public record Error(
+    string ErrorMessage,
+    HttpStatusCode StatusCode,
+    Dictionary<string, string[]> ValidationErrors);
+
+/// <summary>
+/// Factory methods for creating errors.
+/// </summary>
+public static class ErrorFactory
 {
     /// <summary>
     /// Creates a new error.
     /// </summary>
     /// <param name="errorMessage">The error message.</param>
     /// <returns>An <see cref="Error"/> instance.</returns>
-    public static Error New(string errorMessage) => new(errorMessage, new Dictionary<string, string[]>());
-
-    /// <summary>
-    /// Creates a new error with additional details.
-    /// </summary>
-    /// <param name="errorMessage">The error message.</param>
-    /// <param name="validationErrors">The validation errors associated with the error.</param>
-    /// <returns>An <see cref="Error"/> instance.</returns>
-    public static Error New(string errorMessage, IDictionary<string, string[]> validationErrors) => new(errorMessage, validationErrors);
+    public static Error NewError(string errorMessage) => new(errorMessage, HttpStatusCode.BadRequest, []);
 
     /// <summary>
     /// Creates a new error from a <see cref="ValidationResult"/>.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
     /// <returns>An <see cref="Error"/> instance.</returns>
-    public static Error New(ValidationResult validationResult) => new("There were some errors in your submission. Please review and try again.", validationResult.ToDictionary());
+    public static Error NewError(ValidationResult validationResult) => new(
+        "There were some errors in your submission. Please review and try again.",
+        HttpStatusCode.BadRequest,
+        (Dictionary<string, string[]>)validationResult.ToDictionary());
 
     /// <summary>
-    /// Creates an unauthorized error.
+    /// Creates a new unauthorized error.
     /// </summary>
     /// <param name="errorMessage">The error message.</param>
     /// <returns>An <see cref="Error"/> instance.</returns>
-    public static Error Unauthorized(string errorMessage) => new UnauthorizedError(errorMessage);
+    public static Error NewUnauthorizedError(string errorMessage) => new(errorMessage, HttpStatusCode.Unauthorized, []);
 
     /// <summary>
-    /// Creates a not exists error.
+    /// Creates a new item not found error.
     /// </summary>
     /// <param name="errorMessage">The error message.</param>
     /// <returns>An <see cref="Error"/> instance.</returns>
-    public static Error NotExists(string errorMessage) => new NotExistsError(errorMessage);
+    public static Error NewItemNotFoundError(string errorMessage) => new(errorMessage, HttpStatusCode.NotFound, []);
 }
-
-/// <summary>
-/// Represents an unauthorized error.
-/// </summary>
-/// <param name="ErrorMessage">The error message.</param>
-public record UnauthorizedError(string ErrorMessage) : Error(ErrorMessage, new Dictionary<string, string[]>());
-
-/// <summary>
-/// Represents a not exists error.
-/// </summary>
-/// <param name="ErrorMessage">The error message.</param>
-public record NotExistsError(string ErrorMessage) : Error(ErrorMessage, new Dictionary<string, string[]>());
 
 /// <summary>
 /// Extension methods for converting errors to HTTP results.
@@ -224,9 +217,9 @@ public static class ResultExtensions
     /// <returns>An HTTP result representing the error.</returns>
     public static IResult FromError(this IResultExtensions _, Error error) => error switch
     {
-        UnauthorizedError => Results.Unauthorized(),
-        NotExistsError => Results.NotFound(error.ErrorMessage),
-        Error { ValidationErrors.Count: > 0 } => Results.ValidationProblem(error.ValidationErrors, error.ErrorMessage),
-        Error => Results.Problem(error.ErrorMessage),
+        { StatusCode: HttpStatusCode.Unauthorized } => Results.Unauthorized(),
+        { StatusCode: HttpStatusCode.NotFound } => Results.NotFound(error.ErrorMessage),
+        { ValidationErrors.Count: > 0 } => Results.ValidationProblem(error.ValidationErrors, error.ErrorMessage),
+        _ => Results.Problem(error.ErrorMessage),
     };
 }

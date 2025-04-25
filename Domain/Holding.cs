@@ -33,7 +33,7 @@ public class Holding
     /// <summary>
     /// Adds a transaction to the holding.
     /// </summary>
-    /// <param name="transaction">>The transaction to add.</param>
+    /// <param name="transaction">The transaction to add.</param>
     public void AddTransaction(Transaction transaction)
     {
         if (transaction is null)
@@ -49,6 +49,11 @@ public class Holding
         Quantity = transaction.Type == TransactionType.Buy
             ? Quantity + transaction.Quantity
             : Quantity - transaction.Quantity;
+
+        if (Quantity < 0)
+        {
+            throw new InvalidDomainOperationException($"Adding transaction {transaction.Id} would result in negative quantity for this holding.");
+        }
 
         transactions.Add(transaction);
     }

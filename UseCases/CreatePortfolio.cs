@@ -32,7 +32,7 @@ public static class CreatePortfolio
 
             if (!validationResult.IsValid)
             {
-                return Error.New(validationResult);
+                return NewError(validationResult);
             }
 
             var portfolio = new Portfolio { Name = request.Name };

@@ -32,21 +32,21 @@ public static class CreateHolding
 
             if (!validationResult.IsValid)
             {
-                return Error.New(validationResult);
+                return NewError(validationResult);
             }
 
             var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
 
             if (portfolio is null)
             {
-                return Error.NotExists($"Portfolio {request.PortfolioId} not found.");
+                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
             }
 
             var asset = await unitOfWork.Assets.GetByTicker(request.Exchange, request.Ticker);
 
             if (asset is null)
             {
-                return Error.New($"Asset {request.Ticker} on {request.Exchange} not found.");
+                return NewError($"Asset {request.Ticker} on {request.Exchange} not found.");
             }
 
             var holding = new Holding
