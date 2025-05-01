@@ -4,9 +4,9 @@ namespace Portfoli.UseCases;
 
 public static class GetPortfolio
 {
-    public static RouteGroupBuilder MapGetPortfolioEndpoint(this RouteGroupBuilder group)
+    public static IEndpointRouteBuilder MapGetPortfolioEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        group.MapGet("/{portfolioId:guid}", async (Guid portfolioId, GetPortfolioHandler handler) =>
+        endpoints.MapGet("/portfolios/{portfolioId:guid}", async (Guid portfolioId, GetPortfolioHandler handler) =>
         {
             var result = await handler.Handle(new GetPortfolioRequest(portfolioId));
 
@@ -15,7 +15,7 @@ public static class GetPortfolio
                 onError: error => Results.Extensions.FromError(error));
         });
 
-        return group;
+        return endpoints;
     }
 
     public static IServiceCollection AddGetPortfolioServices(this IServiceCollection services)

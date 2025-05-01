@@ -39,23 +39,14 @@ app.UseExceptionHandler(options => options.Run(async context =>
     await result.ExecuteAsync(context);
 }));
 
-app
-    .MapGroup("/portfolios")
-    .MapListPortfoliosEndpoint()
-    .MapGetPortfolioEndpoint()
-    .MapCreatePortfolioEndpoint()
-    .MapDeletePortfolioEndpoint();
-
-app
-    .MapGroup("/portfolios/{portfolioId:guid}/holdings")
-    .MapCreateHoldingEndpoint()
-    .MapDeleteHoldingEndpoint();
-
-app
-    .MapGroup("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions")
-    .MapCreateTransactionEndpoint()
-    .MapDeleteTransactionEndpoint();
-
+app.MapListPortfoliosEndpoints();
+app.MapGetPortfolioEndpoints();
+app.MapCreatePortfolioEndpoints();
+app.MapDeletePortfolioEndpoints();
+app.MapCreateHoldingEndpoints();
+app.MapDeleteHoldingEndpoints();
+app.MapCreateTransactionEndpoints();
+app.MapDeleteTransactionEndpoints();
 app.UseHttpsRedirection();
 
 // TODO: Remove this later and use migrations instead

@@ -2,9 +2,9 @@ namespace Portfoli.UseCases;
 
 public static class CreateTransaction
 {
-    public static RouteGroupBuilder MapCreateTransactionEndpoint(this RouteGroupBuilder group)
+    public static IEndpointRouteBuilder MapCreateTransactionEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        group.MapPost("/", async (Guid portfolioId, Guid holdingId,  CreateTransactionRequest request, CreateTransactionHandler handler) =>
+        endpoints.MapPost("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions", async (Guid portfolioId, Guid holdingId,  CreateTransactionRequest request, CreateTransactionHandler handler) =>
         {
             var result = await handler.Handle(request with { PortfolioId = portfolioId, HoldingId = holdingId });
 
@@ -13,7 +13,7 @@ public static class CreateTransaction
                 onError: error => Results.Extensions.FromError(error));
         });
 
-        return group;
+        return endpoints;
     }
 
     public static IServiceCollection AddCreateTransactionServices(this IServiceCollection services)

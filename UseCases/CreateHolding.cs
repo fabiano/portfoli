@@ -2,9 +2,9 @@ namespace Portfoli.UseCases;
 
 public static class CreateHolding
 {
-    public static RouteGroupBuilder MapCreateHoldingEndpoint(this RouteGroupBuilder group)
+    public static IEndpointRouteBuilder MapCreateHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        group.MapPost("/", async (Guid portfolioId, CreateHoldingRequest request, CreateHoldingHandler handler) =>
+        endpoints.MapPost("/portfolios/{portfolioId:guid}/holdings", async (Guid portfolioId, CreateHoldingRequest request, CreateHoldingHandler handler) =>
         {
             var result = await handler.Handle(request with { PortfolioId = portfolioId });
 
@@ -13,7 +13,7 @@ public static class CreateHolding
                 onError: error => Results.Extensions.FromError(error));
         });
 
-        return group;
+        return endpoints;
     }
 
     public static IServiceCollection AddCreateHoldingServices(this IServiceCollection services)

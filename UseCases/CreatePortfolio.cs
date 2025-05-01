@@ -2,9 +2,9 @@ namespace Portfoli.UseCases;
 
 public static class CreatePortfolio
 {
-    public static RouteGroupBuilder MapCreatePortfolioEndpoint(this RouteGroupBuilder group)
+    public static IEndpointRouteBuilder MapCreatePortfolioEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        group.MapPost("/", async (CreatePortfolioRequest request, CreatePortfolioHandler handler) =>
+        endpoints.MapPost("/portfolios", async (CreatePortfolioRequest request, CreatePortfolioHandler handler) =>
         {
             var result = await handler.Handle(request);
 
@@ -13,7 +13,7 @@ public static class CreatePortfolio
                 onError: error => Results.Extensions.FromError(error));
         });
 
-        return group;
+        return endpoints;
     }
 
     public static IServiceCollection AddCreatePortfolioServices(this IServiceCollection services)

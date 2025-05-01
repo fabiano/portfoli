@@ -2,9 +2,9 @@ namespace Portfoli.UseCases;
 
 public static class DeleteTransaction
 {
-    public static RouteGroupBuilder MapDeleteTransactionEndpoint(this RouteGroupBuilder group)
+    public static IEndpointRouteBuilder MapDeleteTransactionEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        group.MapDelete("/{transactionId:guid}", async (Guid transactionId, Guid portfolioId, Guid holdingId, DeleteTransactionHandler handler) =>
+        endpoints.MapDelete("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions/{transactionId:guid}", async (Guid transactionId, Guid portfolioId, Guid holdingId, DeleteTransactionHandler handler) =>
         {
             var result = await handler.Handle(new DeleteTransactionRequest(portfolioId, holdingId, transactionId));
 
@@ -13,7 +13,7 @@ public static class DeleteTransaction
                 onError: error => Results.Extensions.FromError(error));
         });
 
-        return group;
+        return endpoints;
     }
 
     public static IServiceCollection AddDeleteTransactionServices(this IServiceCollection services)

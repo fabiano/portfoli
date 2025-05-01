@@ -2,9 +2,9 @@ namespace Portfoli.UseCases;
 
 public static class DeletePortfolio
 {
-    public static RouteGroupBuilder MapDeletePortfolioEndpoint(this RouteGroupBuilder group)
+    public static IEndpointRouteBuilder MapDeletePortfolioEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        group.MapDelete("/{portfolioId:guid}", async (Guid portfolioId, DeletePortfolioHandler handler) =>
+        endpoints.MapDelete("/portfolios/{portfolioId:guid}", async (Guid portfolioId, DeletePortfolioHandler handler) =>
         {
             var result = await handler.Handle(new DeletePortfolioRequest(portfolioId));
 
@@ -13,7 +13,7 @@ public static class DeletePortfolio
                 onError: error => Results.Extensions.FromError(error));
         });
 
-        return group;
+        return endpoints;
     }
 
     public static IServiceCollection AddDeletePortfolioServices(this IServiceCollection services)

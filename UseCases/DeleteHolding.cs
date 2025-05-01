@@ -2,9 +2,9 @@ namespace Portfoli.UseCases;
 
 public static class DeleteHolding
 {
-    public static RouteGroupBuilder MapDeleteHoldingEndpoint(this RouteGroupBuilder group)
+    public static IEndpointRouteBuilder MapDeleteHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        group.MapDelete("/{holdingId:guid}", async (Guid portfolioId, Guid holdingId, DeleteHoldingHandler handler) =>
+        endpoints.MapDelete("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}", async (Guid portfolioId, Guid holdingId, DeleteHoldingHandler handler) =>
         {
             var result = await handler.Handle(new DeleteHoldingRequest(portfolioId, holdingId));
 
@@ -13,7 +13,7 @@ public static class DeleteHolding
                 onError: error => Results.Extensions.FromError(error));
         });
 
-        return group;
+        return endpoints;
     }
 
     public static IServiceCollection AddDeleteHoldingServices(this IServiceCollection services)
