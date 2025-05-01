@@ -145,6 +145,13 @@ public record Result<T>
     }
 
     /// <summary>
+    /// Returns the value of the result if it is successful, otherwise returns the specified default value.
+    /// </summary>
+    /// <param name="defaultValue">The default value to return if the result is an error.</param>
+    /// <returns>The value of the result if successful, otherwise the default value.</returns>
+    public T OrDefault(T defaultValue) => IsSuccess ? value! : defaultValue;
+
+    /// <summary>
     /// Deconstructs the result into its value and error components.
     /// </summary>
     /// <param name="value">The value of the result.</param>
