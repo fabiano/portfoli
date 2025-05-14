@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Portfoli.Data;
 
-public class PortfoliDbContext(DbContextOptions<PortfoliDbContext> options) : DbContext(options)
+public abstract class BaseDbContext<TDbContext>(DbContextOptions<TDbContext> options) : DbContext(options) where TDbContext : DbContext
 {
     public DbSet<Portfolio> Portfolios { get; set; }
 
@@ -121,4 +121,25 @@ public class PortfoliDbContext(DbContextOptions<PortfoliDbContext> options) : Db
                 .HasMaxLength(32);
         });
     }
+}
+
+/// <summary>
+/// DbContext for writing operations.
+/// </summary>
+/// <param name="options">The database context options.</param>
+public class WritingDbContext(DbContextOptions<WritingDbContext> options) : BaseDbContext<WritingDbContext>(options)
+{
+}
+
+/// <summary>
+/// DbContext for reading operations.
+/// </summary>
+/// <param name="options">The database context options.</param>
+public class ReadingDbContext(DbContextOptions<ReadingDbContext> options) : BaseDbContext<ReadingDbContext>(options)
+{
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
+    public override int SaveChanges() => throw new NotSupportedException("This context is read-only.");
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException("This context is read-only.");
 }

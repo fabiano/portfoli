@@ -6,7 +6,7 @@ namespace Portfoli.Data;
 /// Implementation of the <see cref="IPortfolioRepository"> interface using the Entity Framework database context.
 /// </summary>
 /// <param name="dbContext">The database context.</param>
-public class PortfolioRepository(PortfoliDbContext dbContext) : IPortfolioRepository
+public class PortfolioRepository(WritingDbContext dbContext) : IPortfolioRepository
 {
     /// <inheritdoc />
     public async Task<Portfolio?> Get(PortfolioId id) => await dbContext.Portfolios

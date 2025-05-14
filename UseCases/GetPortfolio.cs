@@ -26,7 +26,7 @@ public static class GetPortfolio
         return services;
     }
 
-    public class GetPortfolioHandler(PortfoliDbContext dbContext, GetPortfolioRequestValidator validator)
+    public class GetPortfolioHandler(ReadingDbContext dbContext, GetPortfolioRequestValidator validator)
     {
         public async Task<Result<GetPortfolioResponse>> Handle(GetPortfolioRequest request)
         {
@@ -38,7 +38,6 @@ public static class GetPortfolio
             }
 
             var portfolio = await dbContext.Portfolios
-                .AsNoTracking()
                 .Where(p => p.Id == request.Id)
                 .Select(p => new GetPortfolioResponse(p.Id, p.Name))
                 .SingleOrDefaultAsync();

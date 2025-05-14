@@ -28,7 +28,7 @@ public interface IUnitOfWork
 /// </summary>
 /// <param name="serviceProvider">The service provider.</param>
 /// <param name="dbContext">The database context.</param>
-public class UnitOfWork(IServiceProvider serviceProvider, PortfoliDbContext dbContext) : IUnitOfWork
+public class UnitOfWork(IServiceProvider serviceProvider, WritingDbContext dbContext) : IUnitOfWork
 {
     /// <inheritdoc/>
     public IPortfolioRepository Portfolios => serviceProvider.GetRequiredService<IPortfolioRepository>();

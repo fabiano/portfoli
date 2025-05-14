@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("PortfoliDb") ?? throw new InvalidOperationException("Connection string 'PortfoliDb' not found.");
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
-builder.Services.AddDbContext<PortfoliDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("PortfoliDb")));
+builder.Services.AddDbContext<WritingDbContext>(options => options.UseSqlite(connectionString));
+builder.Services.AddDbContext<ReadingDbContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -54,7 +56,7 @@ app.UseHttpsRedirection();
 var dbContext = app.Services
     .CreateScope()
     .ServiceProvider
-    .GetRequiredService<PortfoliDbContext>();
+    .GetRequiredService<WritingDbContext>();
 
 var database = dbContext.Database;
 
