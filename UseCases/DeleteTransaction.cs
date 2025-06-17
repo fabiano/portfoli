@@ -4,80 +4,42 @@ public static class DeleteTransaction
 {
     public static IEndpointRouteBuilder MapDeleteTransactionEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapDelete("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions/{transactionId:guid}", async (Guid transactionId, Guid portfolioId, Guid holdingId, DeleteTransactionHandler handler) =>
+        endpoints.MapDelete("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions/{transactionId:guid}", async (
+            [FromRoute] PortfolioId portfolioId,
+            [FromRoute] HoldingId holdingId,
+            [FromRoute] TransactionId transactionId,
+            [FromServices] IUnitOfWork unitOfWork) =>
         {
-            var result = await handler.Handle(new DeleteTransactionRequest(portfolioId, holdingId, transactionId));
-
-            return result.Match(
-                onSuccess: () => Results.NoContent(),
-                onError: error => Results.Extensions.FromError(error));
-        });
-
-        return endpoints;
-    }
-
-    public static IServiceCollection AddDeleteTransactionServices(this IServiceCollection services)
-    {
-        services.AddScoped<DeleteTransactionHandler>();
-        services.AddScoped<DeleteTransactionRequestValidator>();
-
-        return services;
-    }
-
-    public class DeleteTransactionHandler(IUnitOfWork unitOfWork, DeleteTransactionRequestValidator validator)
-    {
-        public async Task<Result> Handle(DeleteTransactionRequest request)
-        {
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return NewError(validationResult);
-            }
-
-            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
+            var portfolio = await unitOfWork.Portfolios.Get(portfolioId);
 
             if (portfolio is null)
             {
-                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
+                return Results.NotFound($"Portfolio {portfolioId} not found.");
             }
 
-            var holding = portfolio.GetHolding(request.HoldingId);
+            var holding = portfolio.GetHolding(holdingId);
 
             if (holding is null)
             {
-                return NewItemNotFoundError($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+                return Results.NotFound($"Holding {holdingId} not found in portfolio {portfolioId}.");
             }
 
-            var transaction = holding.GetTransaction(request.TransactionId);
+            var transaction = holding.GetTransaction(transactionId);
 
             if (transaction is null)
             {
-                return NewItemNotFoundError($"Transaction {request.TransactionId} not found in holding {request.HoldingId} of portfolio {request.PortfolioId}.");
+                return Results.NotFound($"Transaction {transactionId} not found in holding {holdingId} of portfolio {portfolioId}.");
             }
 
             portfolio.RemoveTransaction(holding, transaction);
 
             await unitOfWork.SaveChanges();
 
-            return Result.Success;
-        }
+            return Results.NoContent();
+        });
+
+        return endpoints;
     }
 
-    public record DeleteTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, TransactionId TransactionId);
-
-    public class DeleteTransactionRequestValidator : AbstractValidator<DeleteTransactionRequest>
-    {
-        public DeleteTransactionRequestValidator()
-        {
-            RuleFor(p => p.PortfolioId)
-                .NotEmpty();
-
-            RuleFor(p => p.HoldingId)
-                .NotEmpty();
-
-            RuleFor(p => p.TransactionId)
-                .NotEmpty();
-        }
-    }
+    public static IServiceCollection AddDeleteTransactionServices(this IServiceCollection services) => services;
 }

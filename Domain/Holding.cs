@@ -113,6 +113,26 @@ public record HoldingId(Guid Value)
     /// </summary>
     /// <returns>A string representation of the HoldingId.</returns>
     override public string ToString() => Value.ToString();
+
+    /// <summary>
+    /// Converts a string representation of a HoldingId to its corresponding HoldingId object.
+    /// </summary>
+    /// <param name="value">The string representation of the HoldingId.</param>
+    /// <param name="holdingId">The resulting HoldingId object.</param>
+    /// <returns>true if the conversion was successful; otherwise, false.</returns>
+    public static bool TryParse(string value, out HoldingId holdingId)
+    {
+        if (Guid.TryParse(value, out var guid))
+        {
+            holdingId = guid;
+
+            return true;
+        }
+
+        holdingId = default!;
+
+        return false;
+    }
 }
 
 /// <summary>

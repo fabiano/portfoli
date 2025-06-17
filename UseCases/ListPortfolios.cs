@@ -1,39 +1,23 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Portfoli.UseCases;
 
 public static class ListPortfolios
 {
     public static IEndpointRouteBuilder MapListPortfoliosEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/portfolios", async (ListPortfoliosHandler handler) =>
+        endpoints.MapGet("/portfolios", async ([FromServices] ReadingDbContext dbContext) =>
         {
-            var result = await handler.Handle(new ListPortfoliosRequest());
+            var response = await dbContext.Portfolios
+                .OrderBy(p => p.Name)
+                .Select(p => new ListPortfoliosResponse(p.Id, p.Name))
+                .ToListAsync();
 
-            return result.Match(
-                onSuccess: response => Results.Ok(response),
-                onError: error => Results.Extensions.FromError(error));
+            return Results.Ok(response);
         });
 
         return endpoints;
     }
 
-    public static IServiceCollection AddListPortfoliosServices(this IServiceCollection services)
-    {
-        services.AddScoped<ListPortfoliosHandler>();
-
-        return services;
-    }
-
-    public class ListPortfoliosHandler(ReadingDbContext dbContext)
-    {
-        public async Task<Result<IEnumerable<ListPortfoliosResponse>>> Handle(ListPortfoliosRequest request) => await dbContext.Portfolios
-            .OrderBy(p => p.Name)
-            .Select(p => new ListPortfoliosResponse(p.Id, p.Name))
-            .ToListAsync();
-    }
-
-    public record ListPortfoliosRequest;
+    public static IServiceCollection AddListPortfoliosServices(this IServiceCollection services) => services;
 
     public record ListPortfoliosResponse(PortfolioId Id, string Name);
 }

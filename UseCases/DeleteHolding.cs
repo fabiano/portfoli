@@ -4,70 +4,34 @@ public static class DeleteHolding
 {
     public static IEndpointRouteBuilder MapDeleteHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapDelete("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}", async (Guid portfolioId, Guid holdingId, DeleteHoldingHandler handler) =>
+        endpoints.MapDelete("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}", async (
+            [FromRoute] PortfolioId portfolioId,
+            [FromRoute] HoldingId holdingId,
+            [FromServices] IUnitOfWork unitOfWork) =>
         {
-            var result = await handler.Handle(new DeleteHoldingRequest(portfolioId, holdingId));
-
-            return result.Match(
-                onSuccess: () => Results.NoContent(),
-                onError: error => Results.Extensions.FromError(error));
-        });
-
-        return endpoints;
-    }
-
-    public static IServiceCollection AddDeleteHoldingServices(this IServiceCollection services)
-    {
-        services.AddScoped<DeleteHoldingHandler>();
-        services.AddScoped<DeleteHoldingRequestValidator>();
-
-        return services;
-    }
-
-    public class DeleteHoldingHandler(IUnitOfWork unitOfWork, DeleteHoldingRequestValidator validator)
-    {
-        public async Task<Result> Handle(DeleteHoldingRequest request)
-        {
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-            {
-                return NewError(validationResult);
-            }
-
-            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
+            var portfolio = await unitOfWork.Portfolios.Get(portfolioId);
 
             if (portfolio is null)
             {
-                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
+                return Results.NotFound($"Portfolio {portfolioId} not found.");
             }
 
-            var holding = portfolio.GetHolding(request.HoldingId);
+            var holding = portfolio.GetHolding(holdingId);
 
             if (holding is null)
             {
-                return NewItemNotFoundError($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+                return Results.NotFound($"Holding {holdingId} not found in portfolio {portfolioId}.");
             }
 
             portfolio.RemoveHolding(holding);
 
             await unitOfWork.SaveChanges();
 
-            return Result.Success;
-        }
+            return Results.NoContent();
+        });
+
+        return endpoints;
     }
 
-    public record DeleteHoldingRequest(PortfolioId PortfolioId, HoldingId HoldingId);
-
-    public class DeleteHoldingRequestValidator : AbstractValidator<DeleteHoldingRequest>
-    {
-        public DeleteHoldingRequestValidator()
-        {
-            RuleFor(p => p.PortfolioId)
-                .NotEmpty();
-
-            RuleFor(p => p.HoldingId)
-                .NotEmpty();
-        }
-    }
+    public static IServiceCollection AddDeleteHoldingServices(this IServiceCollection services) => services;
 }

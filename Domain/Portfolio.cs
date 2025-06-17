@@ -153,6 +153,26 @@ public record PortfolioId(Guid Value)
     /// </summary>
     /// <returns>A string representation of the PortfolioId.</returns>
     override public string ToString() => Value.ToString();
+
+    /// <summary>
+    /// Converts a string representation of a PortfolioId to its corresponding PortfolioId object.
+    /// </summary>
+    /// <param name="value">The string representation of the PortfolioId.</param>
+    /// <param name="portfolioId">The resulting PortfolioId object.</param>
+    /// <returns>true if the conversion was successful; otherwise, false.</returns>
+    public static bool TryParse(string value, out PortfolioId portfolioId)
+    {
+        if (Guid.TryParse(value, out var guid))
+        {
+            portfolioId = guid;
+
+            return true;
+        }
+
+        portfolioId = default!;
+
+        return false;
+    }
 }
 
 /// <summary>

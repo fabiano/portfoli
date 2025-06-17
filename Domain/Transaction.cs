@@ -63,6 +63,26 @@ public record TransactionId(Guid Value)
     /// </summary>
     /// <returns>A string representation of the TransactionId.</returns>
     override public string ToString() => Value.ToString();
+
+    /// <summary>
+    /// Converts a string representation of a TransactionId to its corresponding TransactionId object.
+    /// </summary>
+    /// <param name="value">The string representation of the TransactionId.</param>
+    /// <param name="transactionId">The resulting TransactionId object.</param>
+    /// <returns>true if the conversion was successful; otherwise, false.</returns>
+    public static bool TryParse(string value, out TransactionId transactionId)
+    {
+        if (Guid.TryParse(value, out var guid))
+        {
+            transactionId = guid;
+
+            return true;
+        }
+
+        transactionId = default!;
+
+        return false;
+    }
 }
 
 /// <summary>

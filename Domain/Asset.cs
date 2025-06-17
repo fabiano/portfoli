@@ -59,6 +59,26 @@ public record AssetId(Guid Value)
     /// </summary>
     /// <returns>A string representation of the AssetId.</returns>
     override public string ToString() => Value.ToString();
+
+    /// <summary>
+    /// Converts a string representation of a AssetId to its corresponding AssetId object.
+    /// </summary>
+    /// <param name="value">The string representation of the AssetId.</param>
+    /// <param name="assetId">The resulting AssetId object.</param>
+    /// <returns>true if the conversion was successful; otherwise, false.</returns>
+    public static bool TryParse(string value, out AssetId assetId)
+    {
+        if (Guid.TryParse(value, out var guid))
+        {
+            assetId = guid;
+
+            return true;
+        }
+
+        assetId = default!;
+
+        return false;
+    }
 }
 
 /// <summary>

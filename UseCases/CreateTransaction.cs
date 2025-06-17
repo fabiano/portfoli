@@ -4,49 +4,32 @@ public static class CreateTransaction
 {
     public static IEndpointRouteBuilder MapCreateTransactionEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions", async (Guid portfolioId, Guid holdingId,  CreateTransactionRequest request, CreateTransactionHandler handler) =>
-        {
-            var result = await handler.Handle(request with { PortfolioId = portfolioId, HoldingId = holdingId });
-
-            return result.Match(
-                onSuccess: response => Results.Created($"/portfolios/{portfolioId}/holdings/{holdingId}/transactions/{response.Id}", response),
-                onError: error => Results.Extensions.FromError(error));
-        });
-
-        return endpoints;
-    }
-
-    public static IServiceCollection AddCreateTransactionServices(this IServiceCollection services)
-    {
-        services.AddScoped<CreateTransactionHandler>();
-        services.AddScoped<CreateTransactionRequestValidator>();
-
-        return services;
-    }
-
-    public class CreateTransactionHandler(IUnitOfWork unitOfWork, CreateTransactionRequestValidator validator)
-    {
-        public async Task<Result<CreateTransactionResponse>> Handle(CreateTransactionRequest request)
+        endpoints.MapPost("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions", async (
+            [FromRoute] PortfolioId portfolioId,
+            [FromRoute] HoldingId holdingId,
+            [FromBody] CreateTransactionRequest request,
+            [FromServices] CreateTransactionRequestValidator validator,
+            [FromServices] IUnitOfWork unitOfWork) =>
         {
             var validationResult = await validator.ValidateAsync(request);
 
             if (!validationResult.IsValid)
             {
-                return NewError(validationResult);
+                return Results.ValidationProblem(validationResult.ToDictionary());
             }
 
-            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
+            var portfolio = await unitOfWork.Portfolios.Get(portfolioId);
 
             if (portfolio is null)
             {
-                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
+                return Results.NotFound($"Portfolio {portfolioId} not found.");
             }
 
-            var holding = portfolio.GetHolding(request.HoldingId);
+            var holding = portfolio.GetHolding(holdingId);
 
             if (holding is null)
             {
-                return NewItemNotFoundError($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+                return Results.NotFound($"Holding {holdingId} not found in portfolio {portfolioId}.");
             }
 
             var transaction = new Transaction
@@ -61,11 +44,18 @@ public static class CreateTransaction
 
             await unitOfWork.SaveChanges();
 
-            return new CreateTransactionResponse(transaction.Id);
-        }
+            var response = new CreateTransactionResponse(transaction.Id);
+
+            return Results.Created($"/portfolios/{portfolioId}/holdings/{holdingId}/transactions/{response.Id}", response);
+        });
+
+        return endpoints;
     }
 
-    public record CreateTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, string Type, decimal Quantity, decimal Price, DateTime Date);
+    public static IServiceCollection AddCreateTransactionServices(this IServiceCollection services) =>
+        services.AddScoped<CreateTransactionRequestValidator>();
+
+    public record CreateTransactionRequest(string Type, decimal Quantity, decimal Price, DateTime Date);
 
     public record CreateTransactionResponse(TransactionId Id);
 
@@ -73,12 +63,6 @@ public static class CreateTransaction
     {
         public CreateTransactionRequestValidator()
         {
-            RuleFor(p => p.PortfolioId)
-                .NotEmpty();
-
-            RuleFor(p => p.HoldingId)
-                .NotEmpty();
-
             RuleFor(p => p.Type)
                 .NotEmpty()
                 .IsEnumName(typeof(TransactionType));

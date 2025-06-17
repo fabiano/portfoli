@@ -4,49 +4,31 @@ public static class CreateHolding
 {
     public static IEndpointRouteBuilder MapCreateHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/portfolios/{portfolioId:guid}/holdings", async (Guid portfolioId, CreateHoldingRequest request, CreateHoldingHandler handler) =>
-        {
-            var result = await handler.Handle(request with { PortfolioId = portfolioId });
-
-            return result.Match(
-                onSuccess: response => Results.Created($"/portfolios/{portfolioId}/holdings/{response.Id}", response),
-                onError: error => Results.Extensions.FromError(error));
-        });
-
-        return endpoints;
-    }
-
-    public static IServiceCollection AddCreateHoldingServices(this IServiceCollection services)
-    {
-        services.AddScoped<CreateHoldingHandler>();
-        services.AddScoped<CreateHoldingRequestValidator>();
-
-        return services;
-    }
-
-    public class CreateHoldingHandler(IUnitOfWork unitOfWork, CreateHoldingRequestValidator validator)
-    {
-        public async Task<Result<CreateHoldingResponse>> Handle(CreateHoldingRequest request)
+        endpoints.MapPost("/portfolios/{portfolioId:guid}/holdings", async (
+            [FromRoute] PortfolioId portfolioId,
+            [FromBody] CreateHoldingRequest request,
+            [FromServices] CreateHoldingRequestValidator validator,
+            [FromServices] IUnitOfWork unitOfWork) =>
         {
             var validationResult = await validator.ValidateAsync(request);
 
             if (!validationResult.IsValid)
             {
-                return NewError(validationResult);
+                return Results.ValidationProblem(validationResult.ToDictionary());
             }
 
-            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
+            var portfolio = await unitOfWork.Portfolios.Get(portfolioId);
 
             if (portfolio is null)
             {
-                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
+                return Results.NotFound($"Portfolio {portfolioId} not found.");
             }
 
             var asset = await unitOfWork.Assets.GetByTicker(request.Exchange, request.Ticker);
 
             if (asset is null)
             {
-                return NewError($"Asset {request.Ticker} on {request.Exchange} not found.");
+                return Results.Problem($"Asset {request.Ticker} on {request.Exchange} not found.");
             }
 
             var holding = new Holding
@@ -58,11 +40,18 @@ public static class CreateHolding
 
             await unitOfWork.SaveChanges();
 
-            return new CreateHoldingResponse(holding.Id);
-        }
+            var response = new CreateHoldingResponse(holding.Id);
+
+            return Results.Created($"/portfolios/{portfolioId}/holdings/{response.Id}", response);
+        });
+
+        return endpoints;
     }
 
-    public record CreateHoldingRequest(PortfolioId PortfolioId, string Exchange, string Ticker);
+    public static IServiceCollection AddCreateHoldingServices(this IServiceCollection services) =>
+        services.AddScoped<CreateHoldingRequestValidator>();
+
+    public record CreateHoldingRequest(string Exchange, string Ticker);
 
     public record CreateHoldingResponse(HoldingId Id);
 
@@ -70,9 +59,6 @@ public static class CreateHolding
     {
         public CreateHoldingRequestValidator()
         {
-            RuleFor(p => p.PortfolioId)
-                .NotEmpty();
-
             RuleFor(p => p.Exchange)
                 .NotEmpty();
 

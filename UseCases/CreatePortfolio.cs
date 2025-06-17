@@ -4,35 +4,16 @@ public static class CreatePortfolio
 {
     public static IEndpointRouteBuilder MapCreatePortfolioEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/portfolios", async (CreatePortfolioRequest request, CreatePortfolioHandler handler) =>
-        {
-            var result = await handler.Handle(request);
-
-            return result.Match(
-                onSuccess: response => Results.Created($"/portfolios/{response.Id}", response),
-                onError: error => Results.Extensions.FromError(error));
-        });
-
-        return endpoints;
-    }
-
-    public static IServiceCollection AddCreatePortfolioServices(this IServiceCollection services)
-    {
-        services.AddScoped<CreatePortfolioHandler>();
-        services.AddScoped<CreatePortfolioRequestValidator>();
-
-        return services;
-    }
-
-    public class CreatePortfolioHandler(IUnitOfWork unitOfWork, CreatePortfolioRequestValidator validator)
-    {
-        public async Task<Result<CreatePortfolioResponse>> Handle(CreatePortfolioRequest request)
+        endpoints.MapPost("/portfolios", async (
+            [FromBody] CreatePortfolioRequest request,
+            [FromServices] CreatePortfolioRequestValidator validator,
+            [FromServices] IUnitOfWork unitOfWork) =>
         {
             var validationResult = await validator.ValidateAsync(request);
 
             if (!validationResult.IsValid)
             {
-                return NewError(validationResult);
+                return Results.ValidationProblem(validationResult.ToDictionary());
             }
 
             var portfolio = new Portfolio { Name = request.Name };
@@ -40,9 +21,16 @@ public static class CreatePortfolio
             await unitOfWork.Portfolios.Add(portfolio);
             await unitOfWork.SaveChanges();
 
-            return new CreatePortfolioResponse(portfolio.Id);
-        }
+            var response = new CreatePortfolioResponse(portfolio.Id);
+
+            return Results.Created($"/portfolios/{response.Id}", response);
+        });
+
+        return endpoints;
     }
+
+    public static IServiceCollection AddCreatePortfolioServices(this IServiceCollection services) =>
+        services.AddScoped<CreatePortfolioRequestValidator>();
 
     public record CreatePortfolioRequest(string Name);
 
