@@ -24,27 +24,31 @@ DELETE http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}
 ###
 
 # @name createHolding
-POST http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}/holdings
+POST http://localhost:5197/holdings
 Content-Type: application/json
 
 {
-  "exchange": "NYSE",
-  "ticker": "SPY"
+  "portfolioId": "{{createPortfolio.response.body.$.id}}",
+  "exchange": "XETRA",
+  "ticker": "EUNL",
+  "name": "iShares Core MSCI World UCITS ETF USD (Acc)",
+  "type": "ETF"
 }
 
 ###
 
 # @name deleteHolding
-DELETE http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}/holdings/{{createHolding.response.body.$.id}}
-
+DELETE http://localhost:5197/holdings/{{createHolding.response.body.$.id}}
 
 ###
 
 # @name createTransaction
-POST http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}/holdings/{{createHolding.response.body.$.id}}/transactions
+POST http://localhost:5197/transactions
 Content-Type: application/json
 
 {
+  "portfolioId": "{{createPortfolio.response.body.$.id}}",
+  "holdingId": "{{createHolding.response.body.$.id}}",
   "type": "Buy",
   "quantity": 100,
   "date": "2025-01-01T00:00:00Z",
@@ -54,4 +58,4 @@ Content-Type: application/json
 ###
 
 # @name deleteTransaction
-DELETE http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}/holdings/{{createHolding.response.body.$.id}}/transactions/{{createTransaction.response.body.$.id}}
+DELETE http://localhost:5197/transactions/{{createTransaction.response.body.$.id}}

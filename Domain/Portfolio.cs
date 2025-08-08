@@ -74,59 +74,6 @@ public class Portfolio
     /// <param name="holdingId">The unique identifier of the holding.</param>
     /// <returns>The holding if found; otherwise, null.</returns>
     public Holding? GetHolding(HoldingId holdingId) => holdings.SingleOrDefault(h => h.Id == holdingId);
-
-    /// <summary>
-    /// Adds a transaction to a holding in the portfolio.
-    /// </summary>
-    /// <param name="holding">The holding to which the transaction will be added.</param>
-    /// <param name="transaction">The transaction to add.</param>
-    public void AddTransaction(Holding holding, Transaction transaction)
-    {
-        if (holding is null)
-        {
-            throw new ArgumentNullException(nameof(holding), "Holding cannot be null.");
-        }
-
-        if (transaction is null)
-        {
-            throw new ArgumentNullException(nameof(transaction), "Transaction cannot be null.");
-        }
-
-        holding.AddTransaction(transaction);
-    }
-
-    /// <summary>
-    /// Removes a transaction from a holding in the portfolio.
-    /// </summary>
-    /// <param name="holding">The holding from which the transaction will be removed.</param>
-    /// <param name="transactionToRemove">The transaction to remove.</param>
-    public void RemoveTransaction(Holding holding, Transaction transactionToRemove)
-    {
-        if (holding is null)
-        {
-            throw new ArgumentNullException(nameof(holding), "Holding cannot be null.");
-        }
-
-        if (transactionToRemove is null)
-        {
-            throw new ArgumentNullException(nameof(transactionToRemove), "Transaction cannot be null.");
-        }
-
-        holding.RemoveTransaction(transactionToRemove);
-    }
-
-    /// <summary>
-    /// Gets a transaction by its unique identifier from a specific holding in the portfolio.
-    /// </summary>
-    /// <param name="holdingId">The unique identifier of the holding.</param>
-    /// <param name="transactionId">The unique identifier of the transaction.</param>
-    /// <returns>The transaction if found; otherwise, null.</returns>
-    public Transaction? GetTransaction(HoldingId holdingId, TransactionId transactionId)
-    {
-        var holding = GetHolding(holdingId);
-
-        return holding?.GetTransaction(transactionId);
-    }
 }
 
 /// <summary>

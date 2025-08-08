@@ -4,9 +4,9 @@ public static class DeleteHolding
 {
     public static IEndpointRouteBuilder MapDeleteHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapDelete("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}", async (Guid portfolioId, Guid holdingId, DeleteHoldingHandler handler) =>
+        endpoints.MapDelete("/holdings/{holdingId:guid}", async (Guid holdingId, DeleteHoldingHandler handler) =>
         {
-            var result = await handler.Handle(new DeleteHoldingRequest(portfolioId, holdingId));
+            var result = await handler.Handle(new DeleteHoldingRequest(holdingId));
 
             return result.Match(
                 onSuccess: () => Results.NoContent(),
@@ -35,18 +35,18 @@ public static class DeleteHolding
                 return NewError(validationResult);
             }
 
-            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
+            var portfolio = await unitOfWork.Portfolios.GetByHolding(request.HoldingId);
 
             if (portfolio is null)
             {
-                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
+                return NewItemNotFoundError($"Holding {request.HoldingId} not found.");
             }
 
             var holding = portfolio.GetHolding(request.HoldingId);
 
             if (holding is null)
             {
-                return NewItemNotFoundError($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
+                return NewItemNotFoundError($"Holding {request.HoldingId} not found.");
             }
 
             portfolio.RemoveHolding(holding);
@@ -57,15 +57,12 @@ public static class DeleteHolding
         }
     }
 
-    public record DeleteHoldingRequest(PortfolioId PortfolioId, HoldingId HoldingId);
+    public record DeleteHoldingRequest(HoldingId HoldingId);
 
     public class DeleteHoldingRequestValidator : AbstractValidator<DeleteHoldingRequest>
     {
         public DeleteHoldingRequestValidator()
         {
-            RuleFor(p => p.PortfolioId)
-                .NotEmpty();
-
             RuleFor(p => p.HoldingId)
                 .NotEmpty();
         }

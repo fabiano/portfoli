@@ -11,9 +11,9 @@ public interface IUnitOfWork
     IPortfolioRepository Portfolios { get; }
 
     /// <summary>
-    /// Gets the asset repository.
+    /// Gets the transaction repository.
     /// </summary>
-    IAssetRepository Assets { get; }
+    ITransactionRepository Transactions { get; }
 
     /// <summary>
     /// Saves changes to the database.
@@ -34,7 +34,7 @@ public class UnitOfWork(IServiceProvider serviceProvider, WritingDbContext dbCon
     public IPortfolioRepository Portfolios => serviceProvider.GetRequiredService<IPortfolioRepository>();
 
     /// <inheritdoc/>
-    public IAssetRepository Assets => serviceProvider.GetRequiredService<IAssetRepository>();
+    public ITransactionRepository Transactions => serviceProvider.GetRequiredService<ITransactionRepository>();
 
     /// <inheritdoc/>
     public async Task SaveChanges(CancellationToken cancellationToken = default) => await dbContext.SaveChangesAsync(cancellationToken);

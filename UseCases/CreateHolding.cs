@@ -4,12 +4,12 @@ public static class CreateHolding
 {
     public static IEndpointRouteBuilder MapCreateHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/portfolios/{portfolioId:guid}/holdings", async (Guid portfolioId, CreateHoldingRequest request, CreateHoldingHandler handler) =>
+        endpoints.MapPost("/holdings", async (CreateHoldingRequest request, CreateHoldingHandler handler) =>
         {
-            var result = await handler.Handle(request with { PortfolioId = portfolioId });
+            var result = await handler.Handle(request);
 
             return result.Match(
-                onSuccess: response => Results.Created($"/portfolios/{portfolioId}/holdings/{response.Id}", response),
+                onSuccess: response => Results.Created($"/holdings/{response.Id}", response),
                 onError: error => Results.Extensions.FromError(error));
         });
 
@@ -42,16 +42,15 @@ public static class CreateHolding
                 return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
             }
 
-            var asset = await unitOfWork.Assets.GetByTicker(request.Exchange, request.Ticker);
-
-            if (asset is null)
-            {
-                return NewError($"Asset {request.Ticker} on {request.Exchange} not found.");
-            }
-
             var holding = new Holding
             {
-                Asset = asset,
+                Asset = new Asset
+                {
+                    Exchange = request.Exchange,
+                    Ticker = request.Ticker,
+                    Name = request.Name,
+                    Type = Enum.Parse<AssetType>(request.Type),
+                },
             };
 
             portfolio.AddHolding(holding);
@@ -62,7 +61,7 @@ public static class CreateHolding
         }
     }
 
-    public record CreateHoldingRequest(PortfolioId PortfolioId, string Exchange, string Ticker);
+    public record CreateHoldingRequest(PortfolioId PortfolioId, string Exchange, string Ticker, string Name, string Type);
 
     public record CreateHoldingResponse(HoldingId Id);
 
@@ -74,10 +73,20 @@ public static class CreateHolding
                 .NotEmpty();
 
             RuleFor(p => p.Exchange)
-                .NotEmpty();
+                .NotEmpty()
+                .MaximumLength(128);
 
             RuleFor(p => p.Ticker)
-                .NotEmpty();
+                .NotEmpty()
+                .MaximumLength(128);
+
+            RuleFor(p => p.Name)
+                .NotEmpty()
+                .MaximumLength(512);
+
+            RuleFor(p => p.Type)
+                .NotEmpty()
+                .IsEnumName(typeof(AssetType));
         }
     }
 }

@@ -4,9 +4,9 @@ public static class DeleteTransaction
 {
     public static IEndpointRouteBuilder MapDeleteTransactionEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapDelete("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions/{transactionId:guid}", async (Guid transactionId, Guid portfolioId, Guid holdingId, DeleteTransactionHandler handler) =>
+        endpoints.MapDelete("/transactions/{transactionId:guid}", async (Guid transactionId, DeleteTransactionHandler handler) =>
         {
-            var result = await handler.Handle(new DeleteTransactionRequest(portfolioId, holdingId, transactionId));
+            var result = await handler.Handle(new DeleteTransactionRequest(transactionId));
 
             return result.Match(
                 onSuccess: () => Results.NoContent(),
@@ -35,47 +35,26 @@ public static class DeleteTransaction
                 return NewError(validationResult);
             }
 
-            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
-
-            if (portfolio is null)
-            {
-                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
-            }
-
-            var holding = portfolio.GetHolding(request.HoldingId);
-
-            if (holding is null)
-            {
-                return NewItemNotFoundError($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
-            }
-
-            var transaction = holding.GetTransaction(request.TransactionId);
+            var transaction = await unitOfWork.Transactions.Get(request.TransactionId);
 
             if (transaction is null)
             {
-                return NewItemNotFoundError($"Transaction {request.TransactionId} not found in holding {request.HoldingId} of portfolio {request.PortfolioId}.");
+                return NewItemNotFoundError($"Transaction {request.TransactionId} not found.");
             }
 
-            portfolio.RemoveTransaction(holding, transaction);
-
+            await unitOfWork.Transactions.Delete(transaction);
             await unitOfWork.SaveChanges();
 
             return Result.Success;
         }
     }
 
-    public record DeleteTransactionRequest(PortfolioId PortfolioId, HoldingId HoldingId, TransactionId TransactionId);
+    public record DeleteTransactionRequest(TransactionId TransactionId);
 
     public class DeleteTransactionRequestValidator : AbstractValidator<DeleteTransactionRequest>
     {
         public DeleteTransactionRequestValidator()
         {
-            RuleFor(p => p.PortfolioId)
-                .NotEmpty();
-
-            RuleFor(p => p.HoldingId)
-                .NotEmpty();
-
             RuleFor(p => p.TransactionId)
                 .NotEmpty();
         }

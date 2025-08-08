@@ -14,6 +14,16 @@ public class Transaction
     public TransactionId Id { get; private set; } = Guid.NewGuid();
 
     /// <summary>
+    /// Portfolio to which the transaction belongs.
+    /// </summary>
+    public required PortfolioId PortfolioId { get; init; }
+
+    /// <summary>
+    /// Holding associated with the transaction.
+    /// </summary>
+    public required HoldingId HoldingId { get; init; }
+
+    /// <summary>
     /// Type of the transaction (buy/sell).
     /// </summary>
     public required TransactionType Type { get; set; }
@@ -78,7 +88,7 @@ public enum TransactionType
     /// <summary>
     /// Represents a sell transaction.
     /// </summary>
-    Sell
+    Sell,
 }
 
 /// <summary>

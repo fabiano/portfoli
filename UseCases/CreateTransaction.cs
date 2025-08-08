@@ -4,12 +4,12 @@ public static class CreateTransaction
 {
     public static IEndpointRouteBuilder MapCreateTransactionEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/portfolios/{portfolioId:guid}/holdings/{holdingId:guid}/transactions", async (Guid portfolioId, Guid holdingId,  CreateTransactionRequest request, CreateTransactionHandler handler) =>
+        endpoints.MapPost("/transactions", async (CreateTransactionRequest request, CreateTransactionHandler handler) =>
         {
-            var result = await handler.Handle(request with { PortfolioId = portfolioId, HoldingId = holdingId });
+            var result = await handler.Handle(request);
 
             return result.Match(
-                onSuccess: response => Results.Created($"/portfolios/{portfolioId}/holdings/{holdingId}/transactions/{response.Id}", response),
+                onSuccess: response => Results.Created($"/transactions/{response.Id}", response),
                 onError: error => Results.Extensions.FromError(error));
         });
 
@@ -35,30 +35,17 @@ public static class CreateTransaction
                 return NewError(validationResult);
             }
 
-            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
-
-            if (portfolio is null)
-            {
-                return NewItemNotFoundError($"Portfolio {request.PortfolioId} not found.");
-            }
-
-            var holding = portfolio.GetHolding(request.HoldingId);
-
-            if (holding is null)
-            {
-                return NewItemNotFoundError($"Holding {request.HoldingId} not found in portfolio {request.PortfolioId}.");
-            }
-
             var transaction = new Transaction
             {
+                PortfolioId = request.PortfolioId,
+                HoldingId = request.HoldingId,
                 Type = Enum.Parse<TransactionType>(request.Type),
                 Quantity = request.Quantity,
                 Price = request.Price,
                 Date = request.Date,
             };
 
-            portfolio.AddTransaction(holding, transaction);
-
+            await unitOfWork.Transactions.Add(transaction);
             await unitOfWork.SaveChanges();
 
             return new CreateTransactionResponse(transaction.Id);

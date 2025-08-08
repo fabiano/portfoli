@@ -6,7 +6,7 @@ public abstract class BaseDbContext<TDbContext>(DbContextOptions<TDbContext> opt
 {
     public DbSet<Portfolio> Portfolios { get; set; }
 
-    public DbSet<Asset> Assets { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,20 +42,35 @@ public abstract class BaseDbContext<TDbContext>(DbContextOptions<TDbContext> opt
                 .Property(p => p.Id)
                 .HasConversion(id => id.Value, value => new HoldingId(value));
 
-            entity
-                .HasOne(p => p.Asset)
-                .WithMany()
-                .HasForeignKey("AssetId");
+            entity.OwnsOne(
+                p => p.Asset,
+                asset =>
+                {
+                    asset
+                        .Property(p => p.Exchange)
+                        .IsRequired()
+                        .HasMaxLength(128);
+
+                    asset
+                        .Property(p => p.Ticker)
+                        .IsRequired()
+                        .HasMaxLength(128);
+
+                    asset
+                        .Property(p => p.Name)
+                        .IsRequired()
+                        .HasMaxLength(512);
+
+                    asset
+                        .Property(p => p.Type)
+                        .IsRequired()
+                        .HasConversion<string>()
+                        .HasMaxLength(32);
+                });
 
             entity
                 .Property(p => p.Quantity)
                 .IsRequired();
-
-            entity
-                .HasMany(p => p.Transactions)
-                .WithOne()
-                .HasForeignKey("HoldingId")
-                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Transaction>(entity =>
@@ -66,6 +81,16 @@ public abstract class BaseDbContext<TDbContext>(DbContextOptions<TDbContext> opt
             entity
                 .Property(p => p.Id)
                 .HasConversion(id => id.Value, value => new TransactionId(value));
+
+            entity
+                .Property(p => p.PortfolioId)
+                .HasConversion(id => id.Value, value => new PortfolioId(value))
+                .IsRequired();
+
+            entity
+                .Property(p => p.HoldingId)
+                .HasConversion(id => id.Value, value => new HoldingId(value))
+                .IsRequired();
 
             entity
                 .Property(p => p.Type)
@@ -88,37 +113,6 @@ public abstract class BaseDbContext<TDbContext>(DbContextOptions<TDbContext> opt
             entity
                 .Property(p => p.Commission)
                 .IsRequired();
-        });
-
-        modelBuilder.Entity<Asset>(entity =>
-        {
-            entity.ToTable("Asset");
-            entity.HasKey(p => p.Id);
-
-            entity
-                .Property(p => p.Id)
-                .HasConversion(id => id.Value, value => new AssetId(value));
-
-            entity
-                .Property(p => p.Exchange)
-                .IsRequired()
-                .HasMaxLength(128);
-
-            entity
-                .Property(p => p.Ticker)
-                .IsRequired()
-                .HasMaxLength(128);
-
-            entity
-                .Property(p => p.Name)
-                .IsRequired()
-                .HasMaxLength(512);
-
-            entity
-                .Property(p => p.AssetType)
-                .IsRequired()
-                .HasConversion<string>()
-                .HasMaxLength(32);
         });
     }
 }

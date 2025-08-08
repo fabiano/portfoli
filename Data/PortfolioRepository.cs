@@ -11,10 +11,12 @@ public class PortfolioRepository(WritingDbContext dbContext) : IPortfolioReposit
     /// <inheritdoc />
     public async Task<Portfolio?> Get(PortfolioId id) => await dbContext.Portfolios
         .Include(p => p.Holdings)
-        .ThenInclude(h => h.Asset)
-        .Include(p => p.Holdings)
-        .ThenInclude(h => h.Transactions)
         .SingleOrDefaultAsync(p => p.Id == id);
+
+    /// <inheritdoc />
+    public async Task<Portfolio?> GetByHolding(HoldingId holdingId) => await dbContext.Portfolios
+        .Include(p => p.Holdings)
+        .SingleOrDefaultAsync(p => p.Holdings.Any(h => h.Id == holdingId));
 
     /// <inheritdoc />
     public async Task Add(Portfolio portfolio) => await dbContext.Portfolios.AddAsync(portfolio);
