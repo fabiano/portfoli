@@ -57,6 +57,7 @@ var database = app.Services
     .GetRequiredService<WritingDbContext>()
     .Database;
 
+database.EnsureDeleted();
 database.EnsureCreated();
 database.Migrate();
 
