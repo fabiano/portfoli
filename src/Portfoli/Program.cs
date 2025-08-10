@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Database") ?? throw new InvalidOperationException("Connection string 'Database' not found.");
 
+builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddDbContext<WritingDbContext>(options => options.UseSqlite(connectionString));
@@ -21,6 +22,8 @@ builder.Services.AddCreateTransactionServices();
 builder.Services.AddDeleteTransactionServices();
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
