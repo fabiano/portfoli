@@ -1,10 +1,14 @@
+@endpoint = https://localhost:16002
+
+###
+
 # @name getAllPortfolios
-GET http://localhost:5197/portfolios
+GET {{endpoint}}/portfolios
 
 ###
 
 # @name createPortfolio
-POST http://localhost:5197/portfolios
+POST {{endpoint}}/portfolios
 Content-Type: application/json
 
 {
@@ -14,17 +18,17 @@ Content-Type: application/json
 ###
 
 # @name getPortfolioById
-GET http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}
+GET {{endpoint}}/portfolios/{{createPortfolio.response.body.$.id}}
 
 ###
 
 # @name deletePortfolio
-DELETE http://localhost:5197/portfolios/{{createPortfolio.response.body.$.id}}
+DELETE {{endpoint}}/portfolios/{{createPortfolio.response.body.$.id}}
 
 ###
 
 # @name createHolding
-POST http://localhost:5197/holdings
+POST {{endpoint}}/holdings
 Content-Type: application/json
 
 {
@@ -38,12 +42,12 @@ Content-Type: application/json
 ###
 
 # @name deleteHolding
-DELETE http://localhost:5197/holdings/{{createHolding.response.body.$.id}}
+DELETE {{endpoint}}/holdings/{{createHolding.response.body.$.id}}
 
 ###
 
 # @name createTransaction
-POST http://localhost:5197/transactions
+POST {{endpoint}}/transactions
 Content-Type: application/json
 
 {
@@ -51,11 +55,11 @@ Content-Type: application/json
   "holdingId": "{{createHolding.response.body.$.id}}",
   "type": "Buy",
   "quantity": 100,
-  "date": "2025-01-01T00:00:00Z",
-  "price": 537.61
+  "date": "{{$datetime iso8601}}",
+  "price": 104.05
 }
 
 ###
 
 # @name deleteTransaction
-DELETE http://localhost:5197/transactions/{{createTransaction.response.body.$.id}}
+DELETE {{endpoint}}/transactions/{{createTransaction.response.body.$.id}}

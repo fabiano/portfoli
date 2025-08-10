@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("PortfoliDb") ?? throw new InvalidOperationException("Connection string 'PortfoliDb' not found.");
+var connectionString = builder.Configuration.GetConnectionString("Database") ?? throw new InvalidOperationException("Connection string 'Database' not found.");
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
