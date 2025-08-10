@@ -1,4 +1,4 @@
-namespace Portfoli.Api.Data;
+namespace Portfoli.Data;
 
 /// <summary>
 /// Unit of Work pattern interface.

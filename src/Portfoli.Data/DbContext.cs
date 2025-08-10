@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-
-namespace Portfoli.Api.Data;
+namespace Portfoli.Data;
 
 public abstract class BaseDbContext<TDbContext>(DbContextOptions<TDbContext> options) : DbContext(options) where TDbContext : DbContext
 {

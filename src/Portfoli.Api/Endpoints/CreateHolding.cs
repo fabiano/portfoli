@@ -1,4 +1,4 @@
-namespace Portfoli.Api.UseCases;
+namespace Portfoli.Api.Endpoints;
 
 public static class CreateHolding
 {

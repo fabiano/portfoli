@@ -1,4 +1,4 @@
-namespace Portfoli.Api.Domain;
+namespace Portfoli.Domain;
 
 /// <summary>
 /// Represents an asset that can be held in a portfolio.
@@ -24,25 +24,4 @@ public class Asset
     /// The type of the asset (e.g., stock, ETF, crypto).
     /// </summary>
     public required AssetType Type { get; init; }
-}
-
-/// <summary>
-/// Represents the type of asset (e.g., stock, ETF, crypto).
-/// </summary>
-public enum AssetType
-{
-    /// <summary>
-    /// Represents a stock asset.
-    /// </summary>
-    Stock,
-
-    /// <summary>
-    /// Represents an exchange-traded fund (ETF) asset.
-    /// </summary>
-    ETF,
-
-    /// <summary>
-    /// Represents a cryptocurrency asset.
-    /// </summary>
-    Crypto,
 }

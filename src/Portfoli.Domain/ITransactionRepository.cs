@@ -1,4 +1,4 @@
-namespace Portfoli.Api.Domain;
+namespace Portfoli.Domain;
 
 /// <summary>
 /// Interface for the transaction repository, providing methods to manage transactions.
