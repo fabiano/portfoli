@@ -4,14 +4,16 @@ public static class CreateTransaction
 {
     public static IEndpointRouteBuilder MapCreateTransactionEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/transactions", async (CreateTransactionRequest request, CreateTransactionHandler handler) =>
-        {
-            var result = await handler.Handle(request);
+        endpoints
+            .MapPost("/transactions", async (CreateTransactionRequest request, CreateTransactionHandler handler) =>
+            {
+                var result = await handler.Handle(request);
 
-            return result.Match(
-                onSuccess: response => Results.Created($"/transactions/{response.Id}", response),
-                onError: error => Results.Extensions.FromError(error));
-        });
+                return result.Match(
+                    onSuccess: response => Results.Created($"/transactions/{response.Id}", response),
+                    onError: error => Results.Extensions.FromError(error));
+            })
+            .WithName(nameof(CreateTransaction));
 
         return endpoints;
     }

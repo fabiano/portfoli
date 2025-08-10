@@ -4,14 +4,16 @@ public static class DeletePortfolio
 {
     public static IEndpointRouteBuilder MapDeletePortfolioEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapDelete("/portfolios/{portfolioId:guid}", async (Guid portfolioId, DeletePortfolioHandler handler) =>
-        {
-            var result = await handler.Handle(new DeletePortfolioRequest(portfolioId));
+        endpoints
+            .MapDelete("/portfolios/{portfolioId:guid}", async (Guid portfolioId, DeletePortfolioHandler handler) =>
+            {
+                var result = await handler.Handle(new DeletePortfolioRequest(portfolioId));
 
-            return result.Match(
-                onSuccess: () => Results.NoContent(),
-                onError: error => Results.Extensions.FromError(error));
-        });
+                return result.Match(
+                    onSuccess: () => Results.NoContent(),
+                    onError: error => Results.Extensions.FromError(error));
+            })
+            .WithName(nameof(DeletePortfolio));
 
         return endpoints;
     }

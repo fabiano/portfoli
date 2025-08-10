@@ -4,14 +4,16 @@ public static class DeleteHolding
 {
     public static IEndpointRouteBuilder MapDeleteHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapDelete("/holdings/{holdingId:guid}", async (Guid holdingId, DeleteHoldingHandler handler) =>
-        {
-            var result = await handler.Handle(new DeleteHoldingRequest(holdingId));
+        endpoints
+            .MapDelete("/holdings/{holdingId:guid}", async (Guid holdingId, DeleteHoldingHandler handler) =>
+            {
+                var result = await handler.Handle(new DeleteHoldingRequest(holdingId));
 
-            return result.Match(
-                onSuccess: () => Results.NoContent(),
-                onError: error => Results.Extensions.FromError(error));
-        });
+                return result.Match(
+                    onSuccess: () => Results.NoContent(),
+                    onError: error => Results.Extensions.FromError(error));
+            })
+            .WithName(nameof(DeleteHolding));
 
         return endpoints;
     }

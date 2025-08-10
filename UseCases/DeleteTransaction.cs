@@ -4,14 +4,16 @@ public static class DeleteTransaction
 {
     public static IEndpointRouteBuilder MapDeleteTransactionEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapDelete("/transactions/{transactionId:guid}", async (Guid transactionId, DeleteTransactionHandler handler) =>
-        {
-            var result = await handler.Handle(new DeleteTransactionRequest(transactionId));
+        endpoints
+            .MapDelete("/transactions/{transactionId:guid}", async (Guid transactionId, DeleteTransactionHandler handler) =>
+            {
+                var result = await handler.Handle(new DeleteTransactionRequest(transactionId));
 
-            return result.Match(
-                onSuccess: () => Results.NoContent(),
-                onError: error => Results.Extensions.FromError(error));
-        });
+                return result.Match(
+                    onSuccess: () => Results.NoContent(),
+                    onError: error => Results.Extensions.FromError(error));
+            })
+            .WithName(nameof(DeleteTransaction));
 
         return endpoints;
     }

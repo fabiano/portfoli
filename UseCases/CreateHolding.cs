@@ -4,14 +4,16 @@ public static class CreateHolding
 {
     public static IEndpointRouteBuilder MapCreateHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/holdings", async (CreateHoldingRequest request, CreateHoldingHandler handler) =>
-        {
-            var result = await handler.Handle(request);
+        endpoints
+            .MapPost("/holdings", async (CreateHoldingRequest request, CreateHoldingHandler handler) =>
+            {
+                var result = await handler.Handle(request);
 
-            return result.Match(
-                onSuccess: response => Results.Created($"/holdings/{response.Id}", response),
-                onError: error => Results.Extensions.FromError(error));
-        });
+                return result.Match(
+                    onSuccess: response => Results.Created($"/holdings/{response.Id}", response),
+                    onError: error => Results.Extensions.FromError(error));
+            })
+            .WithName(nameof(CreateHolding));
 
         return endpoints;
     }

@@ -6,14 +6,16 @@ public static class GetPortfolio
 {
     public static IEndpointRouteBuilder MapGetPortfolioEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/portfolios/{portfolioId:guid}", async (Guid portfolioId, GetPortfolioHandler handler) =>
-        {
-            var result = await handler.Handle(new GetPortfolioRequest(portfolioId));
+        endpoints
+            .MapGet("/portfolios/{portfolioId:guid}", async (Guid portfolioId, GetPortfolioHandler handler) =>
+            {
+                var result = await handler.Handle(new GetPortfolioRequest(portfolioId));
 
-            return result.Match(
-                onSuccess: response => Results.Ok(response),
-                onError: error => Results.Extensions.FromError(error));
-        });
+                return result.Match(
+                    onSuccess: response => Results.Ok(response),
+                    onError: error => Results.Extensions.FromError(error));
+            })
+            .WithName(nameof(GetPortfolio));
 
         return endpoints;
     }

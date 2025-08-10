@@ -4,14 +4,16 @@ public static class CreatePortfolio
 {
     public static IEndpointRouteBuilder MapCreatePortfolioEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/portfolios", async (CreatePortfolioRequest request, CreatePortfolioHandler handler) =>
-        {
-            var result = await handler.Handle(request);
+        endpoints
+            .MapPost("/portfolios", async (CreatePortfolioRequest request, CreatePortfolioHandler handler) =>
+            {
+                var result = await handler.Handle(request);
 
-            return result.Match(
-                onSuccess: response => Results.Created($"/portfolios/{response.Id}", response),
-                onError: error => Results.Extensions.FromError(error));
-        });
+                return result.Match(
+                    onSuccess: response => Results.Created($"/portfolios/{response.Id}", response),
+                    onError: error => Results.Extensions.FromError(error));
+            })
+            .WithName(nameof(CreatePortfolio));
 
         return endpoints;
     }
