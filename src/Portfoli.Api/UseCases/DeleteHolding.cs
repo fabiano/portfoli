@@ -1,4 +1,4 @@
-namespace Portfoli.UseCases;
+namespace Portfoli.Api.UseCases;
 
 public static class DeleteHolding
 {

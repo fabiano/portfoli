@@ -2,19 +2,18 @@
 
 [![Continuous integration](https://github.com/fabiano/portfoli/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/fabiano/portfoli/actions/workflows/continuous-integration.yml)
 
-## Prerequisites
-
-- [.NET SDK 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-- [Visual Studio Code](https://code.visualstudio.com/)
-- [EditorConfig for VS Code](https://marketplace.visualstudio.com/items?itemName=editorconfig.editorconfig)
-- [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit)
-
 ## Working on the project
 
-- Install .NET SDK 9: `winget install --exact --id Microsoft.DotNet.SDK.9`
-- Install EditorConfig extension: `code --install-extension editorconfig.editorconfig`
-- Install C# Dev Kit extension: `code --install-extension ms-dotnettools.csdevkit`
+- Install .NET SDK 9
+  - `winget install --exact --id Microsoft.DotNet.SDK.9`
+  - `./dotnet-install.sh --version 9.0.304`
+- Install Code recommended extensions
+  - `code --install-extension editorconfig.editorconfig`
+  - `code --install-extension ms-dotnettools.csdevkit`
+  - `code --install-extension humao.rest-client`
+- Trust ASP.NET HTTPS certificate
+  - https://learn.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-9.0&tabs=visual-studio%2Clinux-sles#trust-the-aspnet-core-https-development-certificate
 - Restore the dependencies: `dotnet restore`
 - Build the project: `dotnet build`
-- (Optional) Start the project: `dotnet watch run`
-- (Optional) Open http://localhost:5197
+- (Optional) Start the `Portfoli.AppHost` project with `dotnet watch run`
+- (Optional) Open https://localhost:16001

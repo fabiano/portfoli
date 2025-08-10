@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Portfoli.UseCases;
+namespace Portfoli.Api.UseCases;
 
 public static class GetPortfolios
 {

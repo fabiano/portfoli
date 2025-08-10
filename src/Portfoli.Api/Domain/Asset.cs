@@ -1,4 +1,4 @@
-namespace Portfoli.Domain;
+namespace Portfoli.Api.Domain;
 
 /// <summary>
 /// Represents an asset that can be held in a portfolio.

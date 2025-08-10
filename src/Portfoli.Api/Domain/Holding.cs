@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Portfoli.Domain;
+namespace Portfoli.Api.Domain;
 
 /// <summary>
 /// Represents a holding of an asset in a portfolio.

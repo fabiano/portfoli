@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Portfoli.ServiceDefaults/Portfoli.ServiceDefaults.csproj" />
+    <ProjectReference Include="../Portfoli.AppHost.ServiceDefaults/Portfoli.AppHost.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

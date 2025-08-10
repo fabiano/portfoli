@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Portfoli.Data;
+namespace Portfoli.Api.Data;
 
 /// <summary>
 /// Implementation of the <see cref="IPortfolioRepository"> interface using the Entity Framework database context.

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Portfoli/Portfoli.csproj" />
+    <ProjectReference Include="../Portfoli.Api/Portfoli.Api.csproj" />
   </ItemGroup>
 
 </Project>

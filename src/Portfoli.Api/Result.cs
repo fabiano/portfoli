@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
-namespace Portfoli;
+namespace Portfoli.Api;
 
 /// <summary>
 /// Represents the result of an operation, which can either be a success or an error.

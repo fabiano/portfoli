@@ -5,7 +5,7 @@
     <Platform Name="x86" />
   </Configurations>
 
-  <Project Path="src/Portfoli/Portfoli.csproj" />
+  <Project Path="src/Portfoli.Api/Portfoli.Api.csproj" />
   <Project Path="src/Portfoli.AppHost/Portfoli.AppHost.csproj" />
-  <Project Path="src/Portfoli.ServiceDefaults/Portfoli.ServiceDefaults.csproj" />
+  <Project Path="src/Portfoli.AppHost.ServiceDefaults/Portfoli.AppHost.ServiceDefaults.csproj" />
 </Solution>
