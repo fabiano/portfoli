@@ -5,5 +5,5 @@
     <Platform Name="x86" />
   </Configurations>
 
-  <Project Path="Portfoli.csproj" />
+  <Project Path="src\Portfoli\Portfoli.csproj" />
 </Solution>
