@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Portfoli.Api/Portfoli.Api.csproj" />
+    <ProjectReference Include="../Portfoli.Data.MigrationRunner/Portfoli.Data.MigrationRunner.csproj" />
   </ItemGroup>
 
 </Project>

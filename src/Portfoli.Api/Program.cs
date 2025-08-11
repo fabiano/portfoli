@@ -51,14 +51,4 @@ app.MapCreateTransactionEndpoints();
 app.MapDeleteTransactionEndpoints();
 app.UseHttpsRedirection();
 
-var database = app.Services
-    .CreateScope()
-    .ServiceProvider
-    .GetRequiredService<WritingDbContext>()
-    .Database;
-
-database.EnsureDeleted();
-database.EnsureCreated();
-database.Migrate();
-
 app.Run();

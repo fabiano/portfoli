@@ -9,5 +9,6 @@
   <Project Path="src/Portfoli.AppHost.ServiceDefaults/Portfoli.AppHost.ServiceDefaults.csproj" />
   <Project Path="src/Portfoli.AppHost/Portfoli.AppHost.csproj" />
   <Project Path="src/Portfoli.Data/Portfoli.Data.csproj" />
+  <Project Path="src/Portfoli.Data.MigrationRunner/Portfoli.Data.MigrationRunner.csproj" />
   <Project Path="src/Portfoli.Domain/Portfoli.Domain.csproj" />
 </Solution>
