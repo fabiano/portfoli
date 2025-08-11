@@ -18,4 +18,9 @@
     <ProjectReference Include="../Portfoli.Infra/Portfoli.Infra.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="appsettings.json" CopyToOutputDirectory="Always" />
+    <None Update="appsettings.Development.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
 </Project>
