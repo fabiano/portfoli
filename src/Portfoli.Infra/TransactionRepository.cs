@@ -1,4 +1,4 @@
-namespace Portfoli.Data;
+namespace Portfoli.Infra;
 
 /// <summary>
 /// Implementation of the <see cref="ITransactionRepository"/> interface using the Entity Framework database context.

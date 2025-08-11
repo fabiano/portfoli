@@ -1,4 +1,4 @@
-namespace Portfoli.Data;
+namespace Portfoli.Infra;
 
 public abstract class BaseDbContext<TDbContext>(DbContextOptions<TDbContext> options) : DbContext(options) where TDbContext : DbContext
 {

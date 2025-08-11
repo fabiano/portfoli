@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Portfoli.Data/Portfoli.Data.csproj" />
+    <ProjectReference Include="../Portfoli.Infra/Portfoli.Infra.csproj" />
   </ItemGroup>
 
 </Project>

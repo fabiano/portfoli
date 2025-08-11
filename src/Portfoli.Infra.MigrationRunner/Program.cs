@@ -11,6 +11,5 @@ var database = host.Services
     .GetRequiredService<WritingDbContext>()
     .Database;
 
-database.EnsureDeleted();
 database.EnsureCreated();
 database.Migrate();

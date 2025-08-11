@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Portfoli.AppHost.ServiceDefaults/Portfoli.AppHost.ServiceDefaults.csproj" />
-    <ProjectReference Include="../Portfoli.Data/Portfoli.Data.csproj" />
+    <ProjectReference Include="../Portfoli.Infra/Portfoli.Infra.csproj" />
     <ProjectReference Include="../Portfoli.Domain/Portfoli.Domain.csproj" />
   </ItemGroup>
 

@@ -6,7 +6,7 @@ builder
     .WithReference(database, connectionName: "Database");
 
 builder
-    .AddProject<Projects.Portfoli_Data_MigrationRunner>("migration-runner")
+    .AddProject<Projects.Portfoli_Infra_MigrationRunner>("migration-runner")
     .WithReference(database, connectionName: "Database")
     .WithExplicitStart();
 

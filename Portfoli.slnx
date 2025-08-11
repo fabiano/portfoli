@@ -8,7 +8,7 @@
   <Project Path="src/Portfoli.Api/Portfoli.Api.csproj" />
   <Project Path="src/Portfoli.AppHost.ServiceDefaults/Portfoli.AppHost.ServiceDefaults.csproj" />
   <Project Path="src/Portfoli.AppHost/Portfoli.AppHost.csproj" />
-  <Project Path="src/Portfoli.Data/Portfoli.Data.csproj" />
-  <Project Path="src/Portfoli.Data.MigrationRunner/Portfoli.Data.MigrationRunner.csproj" />
   <Project Path="src/Portfoli.Domain/Portfoli.Domain.csproj" />
+  <Project Path="src/Portfoli.Infra/Portfoli.Infra.csproj" />
+  <Project Path="src/Portfoli.Infra.MigrationRunner/Portfoli.Infra.MigrationRunner.csproj" />
 </Solution>
