@@ -1,4 +1,4 @@
-namespace Portfoli.Domain;
+namespace Portfoli.Domain.Shared;
 
 /// <summary>
 /// Represents a unique identifier for a holding.

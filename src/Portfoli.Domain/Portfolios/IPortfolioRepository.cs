@@ -1,4 +1,4 @@
-namespace Portfoli.Domain;
+namespace Portfoli.Domain.Portfolios;
 
 /// <summary>
 /// Interface for the portfolio repository, providing methods to manage portfolios and their holdings.
