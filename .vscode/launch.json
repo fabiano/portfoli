@@ -6,7 +6,7 @@
       "name": "Debug",
       "type": "dotnet",
       "request": "launch",
-      "projectPath": "${workspaceFolder}/src/Portfoli.AppHost/Portfoli.AppHost.csproj"
+      "projectPath": "${workspaceFolder}/src/api/Portfoli.csproj"
     },
   ],
 }
