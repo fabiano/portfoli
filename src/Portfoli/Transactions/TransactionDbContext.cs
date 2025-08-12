@@ -24,23 +24,9 @@ public class TransactionDbContext(DbContextOptions<TransactionDbContext> options
                 .IsRequired();
 
             entity
-                .HasOne<Portfolio>()
-                .WithMany()
-                .HasForeignKey(p => p.PortfolioId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity
                 .Property(p => p.HoldingId)
                 .HasConversion(id => id.Value, value => new HoldingId(value))
                 .IsRequired();
-
-            entity
-                .HasOne<Holding>()
-                .WithMany()
-                .HasForeignKey(p => p.HoldingId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
 
             entity
                 .Property(p => p.Type)
