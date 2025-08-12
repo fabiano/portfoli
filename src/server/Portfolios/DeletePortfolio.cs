@@ -1,4 +1,4 @@
-namespace Portfoli.Endpoints;
+namespace Portfoli.Portfolios;
 
 public static class DeletePortfolio
 {
@@ -26,7 +26,7 @@ public static class DeletePortfolio
         return services;
     }
 
-    public class DeletePortfolioHandler(IUnitOfWork unitOfWork, DeletePortfolioRequestValidator validator)
+    public class DeletePortfolioHandler(PortfolioDbContext dbContext, DeletePortfolioRequestValidator validator)
     {
         public async Task<Result> Handle(DeletePortfolioRequest request)
         {
@@ -37,15 +37,18 @@ public static class DeletePortfolio
                 return NewError(validationResult);
             }
 
-            var portfolio = await unitOfWork.Portfolios.Get(request.Id);
+            var portfolio = await dbContext.Portfolios
+                .Include(p => p.Holdings)
+                .SingleOrDefaultAsync(p => p.Id == request.Id);
 
             if (portfolio is null)
             {
                 return NewItemNotFoundError($"Portfolio {request.Id} not found.");
             }
 
-            await unitOfWork.Portfolios.Delete(portfolio);
-            await unitOfWork.SaveChanges();
+            dbContext.Portfolios.Remove(portfolio);
+
+            await dbContext.SaveChangesAsync();
 
             return Result.Success;
         }

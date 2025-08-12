@@ -1,4 +1,4 @@
-namespace Portfoli.Endpoints;
+namespace Portfoli.Portfolios;
 
 public static class CreatePortfolio
 {
@@ -26,7 +26,7 @@ public static class CreatePortfolio
         return services;
     }
 
-    public class CreatePortfolioHandler(IUnitOfWork unitOfWork, CreatePortfolioRequestValidator validator)
+    public class CreatePortfolioHandler(PortfolioDbContext dbContext, CreatePortfolioRequestValidator validator)
     {
         public async Task<Result<CreatePortfolioResponse>> Handle(CreatePortfolioRequest request)
         {
@@ -39,8 +39,9 @@ public static class CreatePortfolio
 
             var portfolio = new Portfolio { Name = request.Name };
 
-            await unitOfWork.Portfolios.Add(portfolio);
-            await unitOfWork.SaveChanges();
+            dbContext.Portfolios.Add(portfolio);
+
+            await dbContext.SaveChangesAsync();
 
             return new CreatePortfolioResponse(portfolio.Id);
         }

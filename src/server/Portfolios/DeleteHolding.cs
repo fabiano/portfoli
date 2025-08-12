@@ -1,4 +1,4 @@
-namespace Portfoli.Endpoints;
+namespace Portfoli.Portfolios;
 
 public static class DeleteHolding
 {
@@ -26,7 +26,7 @@ public static class DeleteHolding
         return services;
     }
 
-    public class DeleteHoldingHandler(IUnitOfWork unitOfWork, DeleteHoldingRequestValidator validator)
+    public class DeleteHoldingHandler(PortfolioDbContext dbContext, DeleteHoldingRequestValidator validator)
     {
         public async Task<Result> Handle(DeleteHoldingRequest request)
         {
@@ -37,7 +37,9 @@ public static class DeleteHolding
                 return NewError(validationResult);
             }
 
-            var portfolio = await unitOfWork.Portfolios.GetByHolding(request.HoldingId);
+            var portfolio = await dbContext.Portfolios
+                .Include(p => p.Holdings)
+                .SingleOrDefaultAsync(p => p.Holdings.Any(h => h.Id == request.HoldingId));
 
             if (portfolio is null)
             {
@@ -53,7 +55,7 @@ public static class DeleteHolding
 
             portfolio.RemoveHolding(holding);
 
-            await unitOfWork.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             return Result.Success;
         }

@@ -2,11 +2,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Database") ?? throw new InvalidOperationException("Connection string 'Database' not found.");
 
 builder.Services.AddProblemDetails();
-builder.Services.AddDbContext<WritingDbContext>(options => options.UseSqlite(connectionString));
-builder.Services.AddDbContext<ReadingDbContext>(options => options.UseSqlite(connectionString));
-builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddDbContext<PortfolioDbContext>(options => options.UseSqlite(connectionString));
+builder.Services.AddDbContext<TransactionDbContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddListPortfoliosServices();
 builder.Services.AddGetPortfolioServices();
 builder.Services.AddCreatePortfolioServices();
@@ -46,7 +43,18 @@ using (var scope = app.Services.CreateScope())
 {
     var database = scope
         .ServiceProvider
-        .GetRequiredService<WritingDbContext>()
+        .GetRequiredService<PortfolioDbContext>()
+        .Database;
+
+    database.EnsureCreated();
+    database.Migrate();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var database = scope
+        .ServiceProvider
+        .GetRequiredService<TransactionDbContext>()
         .Database;
 
     database.EnsureCreated();
@@ -54,3 +62,4 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+

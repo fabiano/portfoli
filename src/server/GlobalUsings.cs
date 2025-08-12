@@ -1,7 +1,7 @@
 // Project namespaces
-global using Portfoli.Domain;
-global using Portfoli.Endpoints;
-global using Portfoli.Infra;
+global using Portfoli;
+global using Portfoli.Portfolios;
+global using Portfoli.Transactions;
 global using static Portfoli.ErrorFactory;
 
 // Packages namespaces

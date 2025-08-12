@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-
-namespace Portfoli.Endpoints;
+namespace Portfoli.Portfolios;
 
 public static class GetPortfolios
 {
@@ -27,7 +25,7 @@ public static class GetPortfolios
         return services;
     }
 
-    public class GetPortfoliosHandler(ReadingDbContext dbContext)
+    public class GetPortfoliosHandler(PortfolioDbContext dbContext)
     {
         public async Task<Result<IEnumerable<GetPortfoliosResponse>>> Handle(GetPortfoliosRequest request) => await dbContext.Portfolios
             .OrderBy(p => p.Name)

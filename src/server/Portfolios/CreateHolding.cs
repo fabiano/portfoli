@@ -1,4 +1,4 @@
-namespace Portfoli.Endpoints;
+namespace Portfoli.Portfolios;
 
 public static class CreateHolding
 {
@@ -26,7 +26,7 @@ public static class CreateHolding
         return services;
     }
 
-    public class CreateHoldingHandler(IUnitOfWork unitOfWork, CreateHoldingRequestValidator validator)
+    public class CreateHoldingHandler(PortfolioDbContext dbContext, CreateHoldingRequestValidator validator)
     {
         public async Task<Result<CreateHoldingResponse>> Handle(CreateHoldingRequest request)
         {
@@ -37,7 +37,9 @@ public static class CreateHolding
                 return NewError(validationResult);
             }
 
-            var portfolio = await unitOfWork.Portfolios.Get(request.PortfolioId);
+            var portfolio = await dbContext.Portfolios
+                .Include(p => p.Holdings)
+                .SingleOrDefaultAsync(p => p.Id == request.PortfolioId);
 
             if (portfolio is null)
             {
@@ -57,7 +59,7 @@ public static class CreateHolding
 
             portfolio.AddHolding(holding);
 
-            await unitOfWork.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             return new CreateHoldingResponse(holding.Id);
         }

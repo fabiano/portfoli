@@ -1,4 +1,4 @@
-namespace Portfoli.Endpoints;
+namespace Portfoli.Transactions;
 
 public static class DeleteTransaction
 {
@@ -26,7 +26,7 @@ public static class DeleteTransaction
         return services;
     }
 
-    public class DeleteTransactionHandler(IUnitOfWork unitOfWork, DeleteTransactionRequestValidator validator)
+    public class DeleteTransactionHandler(TransactionDbContext dbContext, DeleteTransactionRequestValidator validator)
     {
         public async Task<Result> Handle(DeleteTransactionRequest request)
         {
@@ -37,15 +37,16 @@ public static class DeleteTransaction
                 return NewError(validationResult);
             }
 
-            var transaction = await unitOfWork.Transactions.Get(request.TransactionId);
+            var transaction = await dbContext.Transactions.FindAsync(request.TransactionId);
 
             if (transaction is null)
             {
                 return NewItemNotFoundError($"Transaction {request.TransactionId} not found.");
             }
 
-            await unitOfWork.Transactions.Delete(transaction);
-            await unitOfWork.SaveChanges();
+            dbContext.Transactions.Remove(transaction);
+
+            await dbContext.SaveChangesAsync();
 
             return Result.Success;
         }

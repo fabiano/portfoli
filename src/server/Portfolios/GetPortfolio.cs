@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-
-namespace Portfoli.Endpoints;
+namespace Portfoli.Portfolios;
 
 public static class GetPortfolio
 {
@@ -28,7 +26,7 @@ public static class GetPortfolio
         return services;
     }
 
-    public class GetPortfolioHandler(ReadingDbContext dbContext, GetPortfolioRequestValidator validator)
+    public class GetPortfolioHandler(PortfolioDbContext dbContext, GetPortfolioRequestValidator validator)
     {
         public async Task<Result<GetPortfolioResponse>> Handle(GetPortfolioRequest request)
         {
@@ -40,6 +38,7 @@ public static class GetPortfolio
             }
 
             var portfolio = await dbContext.Portfolios
+                .AsNoTracking()
                 .Where(p => p.Id == request.Id)
                 .Select(p => new GetPortfolioResponse(p.Id, p.Name))
                 .SingleOrDefaultAsync();

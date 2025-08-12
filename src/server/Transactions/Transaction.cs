@@ -1,4 +1,4 @@
-namespace Portfoli.Domain;
+namespace Portfoli.Transactions;
 
 /// <summary>
 /// Represents a transaction of an asset in a portfolio.

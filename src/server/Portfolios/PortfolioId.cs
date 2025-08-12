@@ -1,4 +1,4 @@
-namespace Portfoli.Domain;
+namespace Portfoli.Portfolios;
 
 /// <summary>
 /// Represents a unique identifier for a portfolio.

@@ -1,4 +1,4 @@
-namespace Portfoli.Endpoints;
+namespace Portfoli.Transactions;
 
 public static class CreateTransaction
 {
@@ -26,7 +26,7 @@ public static class CreateTransaction
         return services;
     }
 
-    public class CreateTransactionHandler(IUnitOfWork unitOfWork, CreateTransactionRequestValidator validator)
+    public class CreateTransactionHandler(TransactionDbContext dbContext, CreateTransactionRequestValidator validator)
     {
         public async Task<Result<CreateTransactionResponse>> Handle(CreateTransactionRequest request)
         {
@@ -47,8 +47,9 @@ public static class CreateTransaction
                 Date = request.Date,
             };
 
-            await unitOfWork.Transactions.Add(transaction);
-            await unitOfWork.SaveChanges();
+            dbContext.Transactions.Add(transaction);
+
+            await dbContext.SaveChangesAsync();
 
             return new CreateTransactionResponse(transaction.Id);
         }

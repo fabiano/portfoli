@@ -1,4 +1,4 @@
-namespace Portfoli.Domain;
+namespace Portfoli.Portfolios;
 
 /// <summary>
 /// Represents the type of asset (e.g., stock, ETF, crypto).

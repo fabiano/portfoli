@@ -1,4 +1,4 @@
-namespace Portfoli.Domain;
+namespace Portfoli.Transactions;
 
 /// <summary>
 /// Represents a unique identifier for a transaction.
