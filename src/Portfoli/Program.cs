@@ -38,28 +38,4 @@ app.MapDeleteHoldingEndpoints();
 app.MapCreateTransactionEndpoints();
 app.MapDeleteTransactionEndpoints();
 app.UseHttpsRedirection();
-
-using (var scope = app.Services.CreateScope())
-{
-    var database = scope
-        .ServiceProvider
-        .GetRequiredService<PortfolioDbContext>()
-        .Database;
-
-    database.EnsureCreated();
-    database.Migrate();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var database = scope
-        .ServiceProvider
-        .GetRequiredService<TransactionDbContext>()
-        .Database;
-
-    database.EnsureCreated();
-    database.Migrate();
-}
-
 app.Run();
-
